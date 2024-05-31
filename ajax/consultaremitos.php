@@ -29,6 +29,7 @@ try {
                     "id" => $reg->idremito,
                     "fecha" => $reg->fecha,
                     "cliente" => $reg->cliente_nombre,
+                    "pventa" => $reg->pventa
                 );
             }
 
@@ -58,7 +59,10 @@ try {
                         "propiedad" => $reg->propiedad,
                         "tipoenvase" => $reg->tipoenvase,
                         "nserie" => $reg->nserie,
-                        "accion" => $reg->accion
+                        "accion" => $reg->accion,
+                        "cantidad" => $reg->cantidad,
+                        "totalNP" => $reg->totalNP,
+                        "totalSP" => $reg->totalSP
                     );
                 }
             
@@ -87,7 +91,8 @@ try {
                     while ($reg = $rspta->fetch_object()) {
                         $data[] = array(
                             "nserie" => $reg->nserie,
-                            "capacidad" => $reg->capacidad
+                            "capacidad" => $reg->capacidad,
+                            "nombre_tipo_producto" => $reg->nombre_tipo_producto
                         );
                     }
                 

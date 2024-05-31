@@ -45,6 +45,7 @@ function listarRemitos() {
                                     "<tr>" +
                                         "<th style='text-align: center;'>Fecha</th>" +
                                         "<th style='text-align: center;'>Cliente</th>" +
+                                        "<th style='text-align: center;'>Punto de venta</th>" +
                                         "<th style='text-align: center;'>Acciones</th>" +
                                     "</tr>" +
                                 "</thead>" +
@@ -55,6 +56,7 @@ function listarRemitos() {
                                                 "<td style='display: none;'>" + item.id + "</td>" + // Oculta la columna ID
                                                 "<td style='text-align: center;'>" + item.fecha + "</td>" +
                                                 "<td style='text-align: center;'>" + item.cliente + "</td>" +
+                                                "<td style='text-align: center;'>" + item.pventa + "</td>" +
                                                 "<td style='text-align: center;'><button class='btn btn-warning' onclick='verDetalles(" + item.id + ")'>Ver detalles</button></td>" +
                                              "</tr>";
                                 });
@@ -86,17 +88,27 @@ function verDetalles(idRemito) {
                 if (typeof response === 'string') {
                     response = JSON.parse(response);
                 }
-
+                var total = parseInt(response[0].totalSP) + parseInt(response[0].totalNP);
                 var detalles = "<table class='table'>";
-                detalles += "<thead><tr><th style='text-align: center;'>Producto</th><th style='text-align: center;'>Propiedad</th><th style='text-align: center;'>Accion</th><th style='text-align: center;'>Metros</th><th style='text-align: center;'>Tipo de envase</th><th style='text-align: center;'>Detalles</th></tr></thead>";
+                detalles += "<thead id='headDetalles'><tr><th colspan='7' style='text-align: center;'>Despachado: Total: " + total + " | NP: " + response[0].totalNP + " | SP: " +  response[0].totalSP + "</th></tr>";
+                detalles += "<tr><th style='text-align: center;'>Producto</th><th style='text-align: center;'>Propiedad</th><th style='text-align: center;'>Accion</th><th style='text-align: center;'>Metros</th><th style='text-align: center;'>Tipo de envase</th><th style='text-align: center;'>Cantidad</th><th style='text-align: center;'>Detalles</th></tr></thead>";
                 detalles += "<tbody>";
                 response.forEach(function(item) {
                     detalles += "<tr>";
                     detalles += "<td style='text-align: center;'>" + item.nombre_tipo_producto + "</td>";
                     detalles += "<td style='text-align: center;'>" + item.propiedad + "</td>";
                     detalles += "<td style='text-align: center;'>" + item.accion + "</td>";
-                    detalles += "<td style='text-align: center;'>" + item.capacidadSuma + "</td>";
+                    if(item.accion == 'E')
+                        {
+                            detalles += "<td style='text-align: center;'>" + item.capacidadSuma + "</td>";
+                        }
+                        else
+                        {
+                            detalles += "<td style='text-align: center;'>" + "-" + "</td>";
+                        }
+                    
                     detalles += "<td style='text-align: center;'>" + item.tipoenvase + "</td>";
+                    detalles += "<td style='text-align: center;'>" + item.cantidad + "</td>";
                     detalles += "<td style='text-align: center;'><button class='btn btn-warning' onclick='verDetallesEspecificos(" + item.idtipo_producto + ", \"" + item.propiedad + "\", \"" + item.accion + "\", \"" + item.tipoenvase + "\", " + idRemito + ")'>Ver</button></td>";
                     detalles += "</tr>";
                 });
@@ -117,6 +129,7 @@ function verDetalles(idRemito) {
     );
 }
 
+
 function verDetallesEspecificos(idtipo_producto,propiedad,accion,tipoenvase, idRemito)
 {
     $.post(
@@ -128,9 +141,8 @@ function verDetallesEspecificos(idtipo_producto,propiedad,accion,tipoenvase, idR
                     response = JSON.parse(response);
                 }
 
-                var detalles = "<table class='table'>";
-                detalles += "<thead><tr><th style='text-align: center;'>Capacidad</th><th style='text-align: center;'>Nº Serie</th></tr></thead>";
-                detalles += "<tbody>";
+                var detalles = "<table class='table' id='tableMasDetalles'>";
+                detalles += "<thead id='headDetalles'><tr><th colspan='2' style='text-align: center;'>Producto: " + response[0].nombre_tipo_producto + " | Propiedad: " + propiedad + "</th></tr><tr><th style='text-align: center;'>Capacidad</th><th style='text-align: center;'>Nº Serie</th></tr></thead>";                detalles += "<tbody>";
                 response.forEach(function(item) {
                     detalles += "<tr>";
                     detalles += "<td style='text-align: center;'>" + item.capacidad + "</td>";
@@ -138,7 +150,7 @@ function verDetallesEspecificos(idtipo_producto,propiedad,accion,tipoenvase, idR
                     detalles += "</tr>";
                 });
                 detalles += "</tbody></table>";
-
+                
                 $("#masDetallesContainer").html(detalles);
                 $("#masDetallesModal").css("display", "block"); // Muestra el modal
                 $("#detallesModal").css("display", "none");

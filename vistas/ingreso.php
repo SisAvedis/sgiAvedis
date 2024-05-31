@@ -18,7 +18,17 @@
     <div class="content-wrapper">
         <div class="content">
             <div class="row" id="cabeceraRemito">
-                <h4>Detalles del remito</h4>
+                <div class="col-md-3">
+                    <h4>Detalles del remito</h4>
+                </div>
+                <div class="col-md-7"></div>
+                <div class="col-md-2">
+                    <label for="estado">Clasificacion</label>
+                    <div class="radio-group">
+                            <label><input type="radio" name="estado" value="B"> B</label>
+                            <label><input type="radio" name="estado" value="N"> N</label>
+                    </div>
+                </div>
             </div>
             <div class="row" style="margin-top:10px;margin-right:0px;">
                 <div class="col-md-5">
@@ -90,7 +100,7 @@
                     <div class="modal-body" id="modalDetallesBody">
                         <!-- Aquí se mostrarán los detalles del producto -->
                     </div>
-                    <button type="button" onclick="cerrarModal()" class="btn btn-danger" style="font-size:14px;">Cerrar</button>
+                    <button type="button" onclick="cerrarModal()" class="btn btn-warning" style="font-size:14px;">Cerrar</button>
                 </div>
             </div>
         </div>

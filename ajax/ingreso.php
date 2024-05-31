@@ -42,6 +42,9 @@
     case 'listarClientes':
         $registro->listarClientes();
         break;
+    case 'vaciarTemporal':
+        $registro->vaciarTemporal();
+        break;
 }
 
 

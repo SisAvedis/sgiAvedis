@@ -9,7 +9,7 @@ class Registro
 
     public function listar()
     {
-        $sql = "SELECT idtipo_producto, nombre FROM tipo_producto WHERE estado = '1'";
+        $sql = "SELECT idtipo_producto, nombre, codigo FROM tipo_producto WHERE estado = '1'";
         return ejecutarConsulta($sql);
     }
 
@@ -48,10 +48,12 @@ class Registro
         $detalles = $_POST['detalles'];
         $ncomprobante = $_POST['ncomprobante'];
         $fecha = $_POST['fecha'];
+        $estado = $_POST['estado'];
+        $puntoVenta = $_POST['puntoVenta'];
         $idusuario = isset($_COOKIE['idusuario']) ? $_COOKIE['idusuario'] : '';
 
         // Obtener los datos de la tabla temporal
-        $sql = "INSERT INTO remito (idusuario, numero, cliente, informacion, fecha_hora, fecha_remito, estado) VALUES ('$idusuario','$ncomprobante','$cliente','$detalles',NOW(), '$fecha', 1)";
+        $sql = "INSERT INTO remito (idusuario, numero, cliente, informacion, fecha_hora, fecha_remito, clasificacion, pventa, estado) VALUES ('$idusuario','$ncomprobante','$cliente','$detalles',NOW(), '$fecha','$estado', '$puntoVenta', 1)";
         ejecutarConsulta($sql);
 
         $sql = "SELECT IFNULL(MAX(idremito), 1) AS proximo_id FROM remito";
@@ -206,9 +208,16 @@ class Registro
             echo json_encode(array("success" => false, "message" => "Error al obtener los puntos de venta."));
         }
     }
+
+    function vaciarTemporal(){
+        $sql = "DELETE FROM detalle_temporal";
+        ejecutarConsulta($sql);
+        $sql = "ALTER TABLE detalle_temporal AUTO_INCREMENT = 1;";
+        ejecutarConsulta($sql);
+        // Retornar el indicador de éxito junto con los datos insertados
+        echo json_encode(['success' => true]);
+        exit();
+    }
     
 }
-
-
-
 ?>

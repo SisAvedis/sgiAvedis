@@ -143,3 +143,30 @@ h1 {
 .hidden-column {
     display: none;
 }
+
+.modal-header
+{
+    background-color: rgb(24, 133, 64,0.8);
+    color:white;
+}
+#headDetalles{
+    background-color: rgb(24, 133, 64,0.8);
+    color:white; 
+}
+#tableMasDetalles{
+    max-width: 600px;;
+}
+
+#masDetallesModal{
+    margin: auto; /* Centrar horizontalmente */
+    padding: 20px;
+    width: 80%; /* Anchura del contenido del modal */
+    max-width: 300px; /* Anchura máxima del modal */
+    position: relative;
+    top: 30%; /* Mover hacia abajo la mitad de la altura del contenido */
+    transform: translateY(-150%);
+}
+
+.alert-z-index {
+    z-index: 10000 !important; /* Puedes ajustar este valor según sea necesario */
+}

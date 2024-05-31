@@ -37,7 +37,7 @@ function listarProductos() {
                 var options = '<option value="">Seleccione uno</option>';
                 response.data.forEach(function(producto) {
                     //alert("ID: " + producto.idtipo_producto + " Nombre: " + producto.nombre);
-                    options += '<option value="' +  producto.idtipo_producto + '">' + producto.nombre + '</option>';
+                    options += '<option value="' +  producto.idtipo_producto + '">' + producto.nombre + " - " + producto.codigo + '</option>';
                 });
                 $('#tipoProducto').html(options);
                 
@@ -61,7 +61,7 @@ function listarPuntosVenta() {
                 var options = '<option value="">Seleccione uno</option>';
                 response.data.forEach(function(puntoVenta) {
                     // Usar el prefijo en lugar del nombre para las opciones
-                    options += '<option value="' + puntoVenta.prefijo + '">' + puntoVenta.prefijo + " - " + puntoVenta.numero + '</option>';
+                    options += '<option value="' + puntoVenta.prefijo + "-" + puntoVenta.numero + '">' + puntoVenta.prefijo + " - " + puntoVenta.numero + '</option>';
                 });
                 $('#puntoVenta').html(options);
                 
@@ -221,7 +221,7 @@ function mostrarDetalles(data) {
     var envase = data[0].tipoenvase;
     var propiedad = data[0].propiedad;
     var accion = data[0].accion;
-    $('<div id="detalleProductoInfo">Producto: ' + producto + ' | Envase: ' + envase + ' | Propiedad: ' + propiedad + ' | Accion: ' + accion + '</div>').insertAfter('#modalDetallesLabel');
+    $('<div id="detalleProductoInfo">Producto: ' + producto + ' | Envase: ' + envase +  '<br>' + ' Propiedad: ' + propiedad + ' | Accion: ' + accion + '</div>').insertAfter('#modalDetallesLabel');
 
     // Mostrar el modal
     $('#modalDetalles').css('display', 'block');
@@ -333,9 +333,18 @@ function generarCampos() {
     }
 }
 
-
-
-
+window.onbeforeunload = function(event) {
+    $.ajax({
+        url: '../ajax/ingreso.php?op=vaciarTemporal',
+        type: 'POST',
+        success: function(response) {
+            console.log('Petición AJAX ejecutada con éxito:', response);
+        },
+        error: function(xhr, status, error) {
+            console.error('Error en la petición AJAX:', error);
+        }
+    });
+};
 
 
 $(document).ready(function() {
@@ -361,18 +370,74 @@ $(document).ready(function() {
     });
 
     confirmBtn.on('click', function() {
+        // Obtener los valores de los campos
         var tipoProducto = $('#tipoProducto').val();
         var propiedad = $('input[name="propiedad"]:checked').val();
         var propiedad2 = $('input[name="propiedad2"]:checked').val();
         var cantidad = parseInt($('#cantidad').val());
         var accion = $('input[name="accion"]:checked').val();
         var campos = [];
-
+    
+        // Verificar campos de radio buttons
+        if (!propiedad || !propiedad2 || !accion) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Campos sin seleccionar',
+                text: 'Por favor, seleccione una opción en todos los campos de Tipo, Propiedad y Accion antes de continuar.',
+                customClass: {
+                    container: 'alert-z-index'
+                },
+            });
+            return; // Salir de la función si hay campos sin seleccionar
+        }
+    
+        // Verificar campo de select
+        if (!tipoProducto) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Campo sin seleccionar',
+                text: 'Por favor, seleccione una opción en el campo "Tipo de Producto" antes de continuar.',
+                customClass: {
+                    container: 'alert-z-index'
+                },
+            });
+            return; // Salir de la función si el campo de select no está seleccionado
+        }
+    
+        // Verificar cantidad (si es necesaria)
+        if (isNaN(cantidad) || cantidad <= 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Cantidad inválida',
+                text: 'Por favor, ingrese una cantidad válida mayor que cero.',
+                customClass: {
+                    container: 'alert-z-index'
+                },
+            });
+            return; // Salir de la función si la cantidad es inválida
+        }
+    
+        // Verificar campos de número de serie y capacidad
         for (var i = 0; i < cantidad; i++) {
             var nserie = $('#nserie' + i).val();
             var capacidad = $('#capacidad' + i).val();
+    
+            if (nserie === '' || capacidad === '' || isNaN(capacidad) || isNaN(nserie)) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Campos inválidos',
+                    text: 'Por favor, complete todos los campos de número de serie y capacidad con valores numéricos antes de continuar.',
+                    customClass: {
+                        container: 'alert-z-index'
+                    },
+                });
+                return; // Salir de la función si hay campos inválidos
+            }
+    
             campos.push({ nserie: nserie, capacidad: capacidad });
         }
+    
+        // Si todos los campos están completos y válidos, enviar los datos al servidor
         $.ajax({
             url: '../ajax/ingreso.php?op=guardarTemporal',
             type: 'POST',
@@ -380,14 +445,14 @@ $(document).ready(function() {
                 tipoProducto: tipoProducto,
                 propiedad: propiedad,
                 propiedad2: propiedad2,
-                accion:accion,
+                accion: accion,
                 campos: campos
             },
             success: function(response) {
-
                 response = JSON.parse(response);
                 if (response.success) {
-                    $('#tipoProducto').val(''); 
+                    // Limpiar los campos y ocultar el modal si la operación fue exitosa
+                    $('#tipoProducto').val('');
                     $('input[name="propiedad"]:checked').prop('checked', false);
                     $('input[name="propiedad2"]:checked').prop('checked', false);
                     $('input[name="accion"]:checked').prop('checked', false);
@@ -409,24 +474,29 @@ $(document).ready(function() {
         });
     });
 
-   
     $('#enviarDatosBtn').on('click', function() {
+        // Obtener los valores de los campos
         var cliente = $('#cliente').val();
         var ncomprobante = $('#ncomprobante').val();
         var fecha = $('#fecha').val();
-        var detalles = "Remito a Uds. la siguiente mercadería: ";
-
-        $('#detallesProductos tbody tr').each(function() {
-            var producto = $(this).find('td:nth-child(1)').text(); 
-            var cantidad = $(this).find('td:nth-child(4)').text(); 
-            var propiedad = $(this).find('td:nth-child(3)').text();
-            
-            detalles += 'Cargas de ' + producto + ' x ' + cantidad + ' ' + propiedad + ', ';
-        });
-
-        detalles = detalles.slice(0, -2);
-        $('#detalles').val(detalles);
-        
+        var detalles = $('#detalles').val();
+        var estado = $('input[name="estado"]:checked').val();
+        var puntoVenta = $('#puntoVenta').val();
+    
+        // Verificar que los campos obligatorios no estén vacíos
+        if (!cliente || !ncomprobante || !fecha || !puntoVenta || !estado) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Campos obligatorios vacíos',
+                text: 'Por favor, complete todos los campos obligatorios antes de continuar.',
+                customClass: {
+                    container: 'alert-z-index'
+                },
+            });
+            return; // Salir de la función si hay campos obligatorios vacíos
+        }
+    
+        // Realizar la llamada AJAX solo si los campos obligatorios están completos
         $.ajax({
             url: '../ajax/ingreso.php?op=enviarDatosDetalleRemito',
             type: 'POST',
@@ -434,6 +504,8 @@ $(document).ready(function() {
                 cliente: cliente,
                 detalles: detalles,
                 ncomprobante: ncomprobante,
+                estado: estado,
+                puntoVenta: puntoVenta,
                 fecha: fecha
             },
             success: function(response) {
@@ -442,19 +514,22 @@ $(document).ready(function() {
                     Swal.fire({
                         position: "top-end",
                         icon: "success",
-                        title: "Remito cargado con exito",
+                        title: "Remito cargado con éxito",
                         showConfirmButton: false,
                         timer: 1500
-                      });
+                    });
+                    // Limpiar los campos si la operación fue exitosa
                     $('#cliente').val('');
-                    $('#detalles').val('');
                     $('#ncomprobante').val('');
+                    $('#fecha').val('');
+                    $('#detalles').val('');
+                    $('input[name="estado"]:checked').prop('checked', false);
                     actualizarProductos();
                 } else {
                     Swal.fire({
                         icon: "Error",
                         text: "El remito no pudo cargarse"
-                      });
+                    });
                     console.error("Error al enviar datos a detalle_remito:", response.message);
                 }
             },
@@ -463,4 +538,5 @@ $(document).ready(function() {
             }
         });
     });
+    
 });

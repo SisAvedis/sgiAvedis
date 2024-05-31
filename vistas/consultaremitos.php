@@ -75,15 +75,15 @@
         </div>
         <div id="detallesModal" class="modal">
             <div class="modal-content">
-                <span class="close" onclick="cerrarDetallesModal()">&times;</span>
                 <div id="detallesContainer"></div>
+                <button type="button" onclick="cerrarDetallesModal()" class="btn btn-danger" style="font-size:14px;">Cerrar</button>
             </div>
         </div>
 
-        <div id="masDetallesModal" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="cerrarMasDetallesModal()">&times;</span>
+        <div id="masDetallesModal" class="modal" style="max-width:600px;">
+            <div class="modal-content" style="max-width:600px;">
                 <div id="masDetallesContainer"></div>
+                <button type="button" onclick="cerrarMasDetallesModal()" class="btn btn-danger" style="font-size:14px;">Cerrar</button>
             </div>
         </div>
 
