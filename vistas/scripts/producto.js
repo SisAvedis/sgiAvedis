@@ -121,6 +121,7 @@ function mostrar(idtipo_producto) {
             mostrarform(true);
 
             $("#nombre").val(data.nombre);
+            $("#codigo").val(data.codigo);
 
             $("#idtipo_producto").val(data.idtipo_producto); 
         }

@@ -37,6 +37,7 @@
                           <thead>
                             <th>Opciones</th>
                             <th>Nombre</th>
+                            <th>Codigo</th>
                             <th>Estado</th>
                           </thead>
                           <tbody>
@@ -45,18 +46,28 @@
                           <tfoot>
                             <th>Opciones</th>
                             <th>Nombre</th>
+                            <th>Codigo</th>
                             <th>Estado</th>
                           </tfoot>
                         </table>
                     </div>
                     <div class="panel-body"  id="formularioregistros">
                         <form name="formulario" id="formulario" method="POST">
-                          <div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                            <label>Nombre(*):</label>
-                            <input type="hidden" name="idtipo_producto" id="idtipo_producto">
-                            <input type="text" class="form-control" name="nombre" id="nombre" maxlength="50" placeholder="Nombre" required>
+                          <div class="row">
+                            <div class="col-md-6">
+                            <div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                              <label>Codigo(*):</label>
+                              <input type="hidden" name="idtipo_producto" id="idtipo_producto">
+                              <input type="text" class="form-control" name="codigo" id="codigo" maxlength="50" placeholder="Codigo" required>
+                            </div>
+                            </div>
+                            <div class="col-md-6">
+                            <div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                              <label>Nombre(*):</label>
+                              <input type="text" class="form-control" name="nombre" id="nombre" maxlength="50" placeholder="Nombre" required>
+                            </div>
+                            </div>
                           </div>
-                          
                           <div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12">
                             <button class="btn btn-primary" type="submit" id="btnGuardar"><i class="fa fa-save"></i> Guardar</button>
 

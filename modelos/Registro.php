@@ -44,6 +44,7 @@ class Registro
 
     public function enviarDatosDetalleRemito()
     {
+        $idusuarioEditar = isset($_COOKIE['idusuario']) ? $_COOKIE['idusuario'] : '';
         $cliente = $_POST['cliente'];
         $detalles = $_POST['detalles'];
         $ncomprobante = $_POST['ncomprobante'];
@@ -53,8 +54,11 @@ class Registro
         $idusuario = isset($_COOKIE['idusuario']) ? $_COOKIE['idusuario'] : '';
 
         // Obtener los datos de la tabla temporal
-        $sql = "INSERT INTO remito (idusuario, numero, cliente, informacion, fecha_hora, fecha_remito, clasificacion, pventa, estado) VALUES ('$idusuario','$ncomprobante','$cliente','$detalles',NOW(), '$fecha','$estado', '$puntoVenta', 1)";
+        $sql = "INSERT INTO remito (idusuario, numero, cliente, informacion, fecha_hora, fecha_remito, clasificacion, pventa, estado) VALUES (\"$idusuario\",\"$ncomprobante\",\"$cliente\",\"$detalles\",NOW(), \"$fecha\",\"$estado\", \"$puntoVenta\", \"1\")";
         ejecutarConsulta($sql);
+        $sql2 = "INSERT INTO logs (idventana_abm, idusuario, fecha_hora, consulta) VALUES ('2', '$idusuarioEditar', NOW(), '$sql');";
+        ejecutarConsulta($sql2);
+
 
         $sql = "SELECT IFNULL(MAX(idremito), 1) AS proximo_id FROM remito";
 
@@ -79,9 +83,10 @@ class Registro
             $accion = $rowData['accion'];
 
             // Insertar los datos en la tabla detalle_remito
-            $sqlInsert = "INSERT INTO detalle_remito (idremito, idtipo_producto, tipoenvase, propiedad, nserie, capacidad, accion)
-                        VALUES ('$proximo_id','$tipoProducto', '$tipoEnvase', '$propiedad', '$nserie', '$capacidad', '$accion')";
+            $sqlInsert = "INSERT INTO detalle_remito (idremito, idtipo_producto, tipoenvase, propiedad, nserie, capacidad, accion) VALUES (\"$proximo_id\",\"$tipoProducto\", \"$tipoEnvase\", \"$propiedad\", \"$nserie\", \"$capacidad\", \"$accion\")";
             ejecutarConsulta($sqlInsert);
+            $sql2 = "INSERT INTO logs (idventana_abm, idusuario, fecha_hora, consulta) VALUES ('2', '$idusuarioEditar', NOW(), '$sqlInsert');";
+            ejecutarConsulta($sql2);
         }
         $sql = "DELETE FROM detalle_temporal";
         ejecutarConsulta($sql);

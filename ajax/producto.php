@@ -8,16 +8,17 @@ $producto = new Producto();
 
 $idtipo_producto = isset($_POST["idtipo_producto"]) ? limpiarCadena($_POST["idtipo_producto"]) : "";
 $nombre = isset($_POST["nombre"]) ? limpiarCadena($_POST["nombre"]) : "";
+$codigo = isset($_POST["codigo"]) ? limpiarCadena($_POST["codigo"]) : "";
 $capacidad = isset($_POST["capacidad"]) ? limpiarCadena($_POST["capacidad"]) : "";
 $capacidadNueva = isset($_POST["capacidadNueva"]) ? limpiarCadena($_POST["capacidadNueva"]) : "";
 
 switch($_GET["op"]) {
     case 'guardaryeditar':
         if (empty($idtipo_producto)) {
-            $rspta = $producto->insertar($nombre);
+            $rspta = $producto->insertar($nombre, $codigo);
             echo $rspta ? "Producto registrado" : "Producto no se pudo registrar";
         } else {
-            $rspta = $producto->editar($nombre, $idtipo_producto);
+            $rspta = $producto->editar($nombre, $codigo, $idtipo_producto);
             echo $rspta ? "Producto actualizado" : "Producto no se pudo actualizar";
         }
         break;
@@ -51,7 +52,8 @@ switch($_GET["op"]) {
                     " <button class='btn btn-primary' onclick='activar(" . $reg->idtipo_producto . ")' data-toggle='tooltip' title='Activar'><li class='fa fa-check'></li></button>" .
                     " <button class='btn btn-info' onclick='vervolumen(" . $reg->idtipo_producto . ")' data-toggle='tooltip' title='Ver Volumen'><li class='fa fa-flask'></li></button>",
                 "1" => $reg->nombre,
-                "2" => ($reg->estado) ?
+                "2" => $reg->codigo,
+                "3" => ($reg->estado) ?
                     "<span class='label bg-green'>Activado</span>"
                     :
                     "<span class='label bg-red'>Desactivado</span>"

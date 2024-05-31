@@ -5,33 +5,35 @@ class Producto {
     public function __construct() {
     }
 
-    public function insertar($nombre) {
-        $sql = "INSERT INTO tipo_producto (
-                    nombre,
-                    estado
-                ) VALUES (
-                    '$nombre',
-                    '1'
-                )";
+    public function insertar($nombre,$codigo) {
+        $idusuarioEditar = isset($_COOKIE['idusuario']) ? $_COOKIE['idusuario'] : '';
+        $sql = "INSERT INTO tipo_producto (nombre, codigo, estado) VALUES (\"$nombre\",\"$codigo\",\"1\")";
+        $sql2 = "INSERT INTO logs (idventana_abm, idusuario, fecha_hora, consulta) VALUES ('3', '$idusuarioEditar', NOW(), '$sql');";
+        ejecutarConsulta($sql2);
         return ejecutarConsulta($sql);
     }
 
-    public function editar($nombre, $idtipo_producto) {
-        $sql = "UPDATE tipo_producto SET 
-                nombre='$nombre'
-                WHERE idtipo_producto='$idtipo_producto'";
+    public function editar($nombre, $codigo, $idtipo_producto) {
+        $idusuarioEditar = isset($_COOKIE['idusuario']) ? $_COOKIE['idusuario'] : '';
+        $sql = "UPDATE tipo_producto SET nombre=\"$nombre\", codigo=\"$codigo\" WHERE idtipo_producto=\"$idtipo_producto\"";
+        $sql2 = "INSERT INTO logs (idventana_abm, idusuario, fecha_hora, consulta) VALUES ('3', '$idusuarioEditar', NOW(), '$sql');";
+        ejecutarConsulta($sql2);
         return ejecutarConsulta($sql);
     }
 
     public function desactivar($idtipo_producto) {
-        $sql = "UPDATE tipo_producto SET estado='0' 
-               WHERE idtipo_producto='$idtipo_producto'";
+        $idusuarioEditar = isset($_COOKIE['idusuario']) ? $_COOKIE['idusuario'] : '';
+        $sql = "UPDATE tipo_producto SET estado=\"0\" WHERE idtipo_producto=\"$idtipo_producto\"";
+        $sql2 = "INSERT INTO logs (idventana_abm, idusuario, fecha_hora, consulta) VALUES ('3', '$idusuarioEditar', NOW(), '$sql');";
+        ejecutarConsulta($sql2);
         return ejecutarConsulta($sql);
     }
 
     public function activar($idtipo_producto) {
-        $sql = "UPDATE tipo_producto SET estado='1' 
-               WHERE idtipo_producto='$idtipo_producto'";
+        $idusuarioEditar = isset($_COOKIE['idusuario']) ? $_COOKIE['idusuario'] : '';
+        $sql = "UPDATE tipo_producto SET estado=\"1\" WHERE idtipo_producto=\"$idtipo_producto\"";
+        $sql2 = "INSERT INTO logs (idventana_abm, idusuario, fecha_hora, consulta) VALUES ('3', '$idusuarioEditar', NOW(), '$sql');";
+        ejecutarConsulta($sql2);
         return ejecutarConsulta($sql);
     }
 
@@ -53,18 +55,26 @@ class Producto {
     }
 
     public function eliminarVolumen($idtipo_producto,$capacidad){
-        $sql = "DELETE FROM capacidad_producto 
-        WHERE idtipo_producto='$idtipo_producto' AND capacidad = '$capacidad'";
-    return ejecutarConsulta($sql);
+        $idusuarioEditar = isset($_COOKIE['idusuario']) ? $_COOKIE['idusuario'] : '';
+        $sql = "DELETE FROM capacidad_producto WHERE idtipo_producto=\"$idtipo_producto\" AND capacidad = \"$capacidad\"";
+        $sql2 = "INSERT INTO logs (idventana_abm, idusuario, fecha_hora, consulta) VALUES ('3', '$idusuarioEditar', NOW(), '$sql');";
+        ejecutarConsulta($sql2);
+        return ejecutarConsulta($sql);
     }
 
     public function modificarVolumen($idtipo_producto,$capacidad,$capacidadNueva){
-        $sql = "UPDATE capacidad_producto SET capacidad='$capacidadNueva' WHERE idtipo_producto='$idtipo_producto' AND capacidad='$capacidad'";
+        $idusuarioEditar = isset($_COOKIE['idusuario']) ? $_COOKIE['idusuario'] : '';
+        $sql = "UPDATE capacidad_producto SET capacidad=\"$capacidadNueva\" WHERE idtipo_producto=\"$idtipo_producto\" AND capacidad=\"$capacidad\"";
+        $sql2 = "INSERT INTO logs (idventana_abm, idusuario, fecha_hora, consulta) VALUES ('3', '$idusuarioEditar', NOW(), '$sql');";
+        ejecutarConsulta($sql2);
         return ejecutarConsulta($sql);
     }
 
     public function agregarVolumen($idtipo_producto, $capacidadNueva) {
-        $sql = "INSERT INTO capacidad_producto (idtipo_producto, capacidad) VALUES ('$idtipo_producto', '$capacidadNueva')";
+        $idusuarioEditar = isset($_COOKIE['idusuario']) ? $_COOKIE['idusuario'] : '';
+        $sql = "INSERT INTO capacidad_producto (idtipo_producto, capacidad) VALUES (\"$idtipo_producto\", \"$capacidadNueva\")";
+        $sql2 = "INSERT INTO logs (idventana_abm, idusuario, fecha_hora, consulta) VALUES ('3', '$idusuarioEditar', NOW(), '$sql');";
+        ejecutarConsulta($sql2);
         return ejecutarConsulta($sql);
     }
     
