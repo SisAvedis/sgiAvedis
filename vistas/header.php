@@ -1,4 +1,5 @@
-<?php
+
+      <?php
   if(strlen(session_id()) < 1) //Si la variable de session no esta iniciada
   {
     session_start();
@@ -34,6 +35,7 @@
     <link rel="stylesheet" href="../public/css/font-awesome.css">
     <!-- Theme style -->
     <link rel="stylesheet" href="../public/css/AdminLTE.min.css">
+    
     <!-- AdminLTE Skins. Choose a skin from the css/skins
          folder instead of downloading all of them to reduce the load. -->
     <link rel="stylesheet" href="../public/css/_all-skins.min.css">
@@ -46,6 +48,7 @@
     <link rel="stylesheet" href="../public/datatables/responsive.dataTables.min.css">
     
     <link rel="stylesheet" href="../public/css/bootstrap-select.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     
 
   </head>
@@ -122,26 +125,39 @@
                 </li>';
               }
 
-              if($_COOKIE['ABM'] == 1)
+              if($_COOKIE['remitos'] == 1)
               {
-                /*echo 
+                echo 
                 '<li class="treeview">
                     <a href="#">
-                      <i class="fa fa-file"></i>
-                      <span>Gestionar Documentos</span>
+                    <i class="fa fa-book" aria-hidden="true"></i> <span>Remito</span>
                       <i class="fa fa-angle-left pull-right"></i>
                     </a>
                     <ul class="treeview-menu">
-                      <li><a href="sector.php"><i class="fa fa-circle-o"></i> Sectores</a></li>
-					  <li><a href="tipodocumento.php"><i class="fa fa-circle-o"></i> Tipos de Documento</a></li>
-					  <li><a href="consultaentregas.php"><i class="fa fa-circle-o"></i> Impresiones</a></li>
-					  <li><a href="documento.php"><i class="fa fa-circle-o"></i> Documentos</a></li>
-					  <li><a href="relacionproins.php"><i class="fa fa-circle-o"></i> Relación Proc Inst</a></li>
+                      <li><a href="ingreso.php"><i class="fa fa-circle-o"></i> Generar remito</a></li>
+                      <li><a href="consultaremitos.php"><i class="fa fa-circle-o"></i> Consulta remitos</a></li>
                     </ul>
                   </li>'
-                 ;*/
+                 ;
               }
 			 
+              
+              if($_COOKIE['ABM'] == 1)
+              {
+                echo 
+                '<li class="treeview">
+                    <a href="#">
+                      <i class="fa fa-archive" aria-hidden="true"></i> <span>Gestión</span>
+                      <i class="fa fa-angle-left pull-right"></i>
+                    </a>
+                    <ul class="treeview-menu">
+                      <li><a href="cliente.php"><i class="fa fa-circle-o"></i> Clientes</a></li> 
+                      <li><a href="producto.php"><i class="fa fa-circle-o"></i> Productos</a></li>
+                      <li><a href="pventa.php"><i class="fa fa-circle-o"></i> Puntos de venta</a></li>                
+                    </ul>
+                  </li>'
+                 ;
+              }
               if($_COOKIE['acceso'] == 1)
               {
                 echo 
@@ -153,24 +169,9 @@
                     <ul class="treeview-menu">
                       <li><a href="usuario.php"><i class="fa fa-circle-o"></i> Usuarios</a></li>
                       <li><a href="permiso.php"><i class="fa fa-circle-o"></i> Permisos</a></li>
-                      
                     </ul>
                   </li>'
                  ;
-              }
-              if($_COOKIE['consulta'] == 1)
-              {
-                /*echo 
-                '<li class="treeview">
-                    <a href="#">
-                      <i class="fa fa-book"></i> <span>Ver Documentos</span>
-                      <i class="fa fa-angle-left pull-right"></i>
-                    </a>
-                    <ul class="treeview-menu">
-                      <li><a href="consultadocumento.php"><i class="fa fa-circle-o"></i> Consulta Documentos</a></li>                
-                    </ul>
-                  </li>'
-                 ;*/
               }
             ?>                                
           

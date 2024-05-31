@@ -64,11 +64,11 @@
             while ($reg = $rspta->fetch_object()) {
                 $data[] = array(
                     "0"=> ($reg->condicion) ? 
-                        '<button class="btn btn-warning" onclick="mostrar('.$reg->idusuario.')"><li class="fa fa-pencil"></li></button>'.
-                        ' <button class="btn btn-danger" onclick="desactivar('.$reg->idusuario.')"><li class="fa fa-close"></li></button>'
+                        '<button class="btn btn-warning" onclick="mostrar('.$reg->idusuario.')" data-toggle="tooltip" title="Editar"><li class="fa fa-pencil"></li></button>'.
+                        ' <button class="btn btn-danger" onclick="desactivar('.$reg->idusuario.')" data-toggle="tooltip" title="Desactivar"><li class="fa fa-close"></li></button>'
                         :
-                        '<button class="btn btn-warning" onclick="mostrar('.$reg->idusuario.')"><li class="fa fa-pencil"></li></button>'.
-                        ' <button class="btn btn-primary" onclick="activar('.$reg->idusuario.')"><li class="fa fa-check"></li></button>'
+                        '<button class="btn btn-warning" onclick="mostrar('.$reg->idusuario.')" data-toggle="tooltip" title="Editar"><li class="fa fa-pencil"></li></button>'.
+                        ' <button class="btn btn-primary" onclick="activar('.$reg->idusuario.')" data-toggle="tooltip" title="Activar"><li class="fa fa-check"></li></button>'
                         ,
                     "1"=>$reg->nombre,
                     "2"=>$reg->login,
@@ -162,6 +162,7 @@
                 in_array(2,$valores) ? setcookie("ABM", "1", 0, "/") : setcookie("ABM", "0", 0, "/");
                 in_array(3,$valores) ? setcookie("acceso", "1", 0, "/") : setcookie("acceso", "0", 0, "/");
                 in_array(4,$valores) ? setcookie("consulta", "1", 0, "/") : setcookie("consulta", "0", 0, "/");
+                in_array(5,$valores) ? setcookie("remitos", "1", 0, "/") : setcookie("remitos", "0", 0, "/");
             }
 
             echo json_encode($fetch); //Retornando JSON

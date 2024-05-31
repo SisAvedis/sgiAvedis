@@ -25,12 +25,7 @@
                         '1'
                         )";
             
-            //return ejecutarConsulta($sql);
-            echo $sql;
             $idusuarionew = ejecutarConsulta_retornarID($sql);
-            echo '<br>';
-            echo $idusuarionew;
-            echo '<br>';
             $num_elementos = 0;
             $sw = true;
 
@@ -49,8 +44,6 @@
 
                 $num_elementos = $num_elementos + 1;
             }
-            echo $sw;
-            echo '<br>';
             return $sw;
         }
 
