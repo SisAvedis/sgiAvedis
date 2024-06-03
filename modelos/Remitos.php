@@ -15,26 +15,29 @@ class Remitos {
 
     public function verDetalles($id) {
         $sql = "SELECT 
-        (SELECT COUNT(*) FROM detalle_remito WHERE propiedad = 'NP' AND idremito = '$id') AS totalNP,
-        (SELECT COUNT(*) FROM detalle_remito WHERE propiedad = 'SP' AND idremito = '$id') AS totalSP,
-        COUNT(*) AS cantidad,
-        d.idtipo_producto, 
-        tp.nombre AS tipo_producto_nombre, 
-        SUM(d.capacidad) AS capacidadSuma, 
-        d.propiedad, 
-        d.tipoenvase, 
-        d.nserie, 
-        d.accion, 
-        d.capacidad
-    FROM 
-        detalle_remito d
-    INNER JOIN 
-        tipo_producto tp ON d.idtipo_producto = tp.idtipo_producto
-    WHERE 
-        d.idremito = '$id'
-    GROUP BY 
-        d.idtipo_producto, d.propiedad, d.tipoenvase, d.accion;
-    ";
+                    (SELECT COUNT(*) FROM detalle_remito WHERE propiedad = 'NP' AND idremito = '$id' AND accion = 'E') AS totalNPE,
+                    (SELECT COUNT(*) FROM detalle_remito WHERE propiedad = 'NP' AND idremito = '$id' AND accion = 'D') AS totalNPD,
+                    (SELECT COUNT(*) FROM detalle_remito WHERE propiedad = 'SP' AND idremito = '$id' AND accion = 'E') AS totalSPE,
+                    (SELECT COUNT(*) FROM detalle_remito WHERE propiedad = 'SP' AND idremito = '$id' AND accion = 'D') AS totalSPD,
+                    (SELECT COUNT(*) FROM detalle_remito WHERE idremito = '$id' AND accion = 'E') AS totalE,
+                    (SELECT COUNT(*) FROM detalle_remito WHERE idremito = '$id' AND accion = 'D') AS totalD,
+                    COUNT(*) AS cantidad,
+                    d.idtipo_producto, 
+                    tp.nombre AS tipo_producto_nombre, 
+                    SUM(CASE WHEN d.accion = 'E' THEN d.capacidad ELSE 0 END) AS capacidadSuma,
+                    d.propiedad, 
+                    d.tipoenvase, 
+                    d.nserie, 
+                    d.accion
+                FROM 
+                    detalle_remito d
+                INNER JOIN 
+                    tipo_producto tp ON d.idtipo_producto = tp.idtipo_producto
+                WHERE 
+                    d.idremito = '$id'
+                GROUP BY 
+                    d.idtipo_producto, d.propiedad, d.tipoenvase, d.accion;
+                ";
         return ejecutarConsulta($sql);
     }
 

@@ -1,7 +1,5 @@
 function init() {
     listarProductos();
-    listarPuntosVenta();
-    listarClientes();
     actualizarProductos();
 }
 function listarClientes(){
@@ -37,7 +35,7 @@ function listarProductos() {
                 var options = '<option value="">Seleccione uno</option>';
                 response.data.forEach(function(producto) {
                     //alert("ID: " + producto.idtipo_producto + " Nombre: " + producto.nombre);
-                    options += '<option value="' +  producto.idtipo_producto + '">' + producto.nombre + " - " + producto.codigo + '</option>';
+                    options += '<option value="' +  producto.idtipo_producto + '">' + producto.nombre + "-" + producto.codigo + '</option>';
                 });
                 $('#tipoProducto').html(options);
                 
@@ -61,7 +59,7 @@ function listarPuntosVenta() {
                 var options = '<option value="">Seleccione uno</option>';
                 response.data.forEach(function(puntoVenta) {
                     // Usar el prefijo en lugar del nombre para las opciones
-                    options += '<option value="' + puntoVenta.prefijo + "-" + puntoVenta.numero + '">' + puntoVenta.prefijo + " - " + puntoVenta.numero + '</option>';
+                    options += '<option value="' + puntoVenta.prefijo + "-" + puntoVenta.numero + '">' + puntoVenta.prefijo + "-" + puntoVenta.numero + '</option>';
                 });
                 $('#puntoVenta').html(options);
                 
@@ -346,6 +344,62 @@ window.onbeforeunload = function(event) {
     });
 };
 
+document.addEventListener('DOMContentLoaded', function() {
+    const mostrarCambiarDatos = sessionStorage.getItem('mostrarCambiarDatos');
+    const idCambio = sessionStorage.getItem('idCambio');
+    listarPuntosVenta();
+    listarClientes();
+            if (mostrarCambiarDatos) {
+                document.getElementById('enviarDatosBtn').style.display = 'none';
+                document.getElementById('cambiarDatosBtn').style.display = 'inline-block';
+                document.getElementById('cancelarBtn').style.display = 'inline-block';
+                $.ajax({
+                    url: '../ajax/ingreso.php?op=mostrarRemito',
+                    data: { idRemito: idCambio },
+                    type: 'POST',
+                    success: function(response) {
+                        
+                        var remitoData = JSON.parse(response);
+                        if (remitoData.clasificacion === 'B') {
+                            document.querySelector('input[name="estado"][value="B"]').checked = true;
+                        } else if (remitoData.clasificacion === 'N') {
+                            document.querySelector('input[name="estado"][value="N"]').checked = true;
+                        }
+                        var selectPuntoVenta = document.getElementById('puntoVenta');
+                        var selectCliente = document.getElementById('cliente');
+                        var puntoVentaRemito = remitoData.pventa;
+                        var clienteRemito = remitoData.cliente;
+                        for (var i = 1; i < selectPuntoVenta.options.length; i++) {
+                            var option = selectPuntoVenta.options[i];
+                            if (option.value == puntoVentaRemito) {
+                                option.selected = true;
+                                break;
+                            }
+                        }
+                        for (var i = 1; i < selectCliente.options.length; i++) {
+                            var option = selectCliente.options[i];
+                            if (option.value == clienteRemito) {
+                                option.selected = true;
+                                break;
+                            }
+                        }
+                        document.getElementById('ncomprobante').value = remitoData.numero;
+                        var fecha = new Date(remitoData.fecha_remito);
+                        var formattedDate = fecha.toISOString().split('T')[0];
+                        document.getElementById('fecha').value = formattedDate;
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error en la petición AJAX:', error);
+                    }
+                });
+
+                // Limpiar sessionStorage
+                sessionStorage.removeItem('mostrarCambiarDatos');
+            }else{
+                listarPuntosVenta();
+                listarClientes();
+            }
+        });
 
 $(document).ready(function() {
     init();
@@ -355,7 +409,8 @@ $(document).ready(function() {
     var closeModalBtn = modal.find('.close');
     var cancelBtn = $('#cancelBtn');
     var confirmBtn = $('#confirmBtn');
-
+    var $cancelarBtn = $('#cancelarBtn');
+        
     openModalBtn.on('click', function() {
         modal.show();
         listarProductos();
@@ -367,6 +422,11 @@ $(document).ready(function() {
 
     cancelBtn.on('click', function() {
         modal.hide();
+    });
+
+    $cancelarBtn.on('click', function() {
+        sessionStorage.removeItem('idCambio');
+        window.location.href = "consultaremitos.php";
     });
 
     confirmBtn.on('click', function() {
@@ -470,6 +530,67 @@ $(document).ready(function() {
             },
             error: function(xhr, status, error) {
                 console.error("Error al guardar datos:", error);
+            }
+        });
+    });
+
+   
+    $('#cambiarDatosBtn').on('click',function(){
+        var cliente = $('#cliente').val();
+        var ncomprobante = $('#ncomprobante').val();
+        var fecha = $('#fecha').val();
+        var detalles = $('#detalles').val();
+        var estado = $('input[name="estado"]:checked').val();
+        var puntoVenta = $('#puntoVenta').val();
+        const idCambio = sessionStorage.getItem('idCambio');
+    
+        if (!cliente || !ncomprobante || !fecha || !puntoVenta || !estado) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Campos obligatorios vacíos',
+                text: 'Por favor, complete todos los campos obligatorios antes de continuar.',
+                customClass: {
+                    container: 'alert-z-index'
+                },
+            });
+            return;
+        }
+
+        $.ajax({
+            url: '../ajax/ingreso.php?op=editarRemito',
+            data: { idRemito: idCambio },
+            type: 'POST',
+            data: {
+                cliente: cliente,
+                detalles: detalles,
+                ncomprobante: ncomprobante,
+                estado: estado,
+                puntoVenta: puntoVenta,
+                fecha: fecha,
+                idCambio: idCambio
+            },
+            success: function(response) {
+                response = JSON.parse(response);
+                if (response.success) {
+                    Swal.fire({
+                        position: "top-end",
+                        icon: "success",
+                        title: "Remito editado con éxito",
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                    sessionStorage.removeItem('idCambio');
+                    window.location.href = "consultaremitos.php";
+                } else {
+                    Swal.fire({
+                        icon: "Error",
+                        text: "El remito no pudo cargarse"
+                    });
+                    console.error("Error al enviar datos a detalle_remito:", response.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error en la petición AJAX:', error);
             }
         });
     });

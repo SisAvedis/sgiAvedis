@@ -90,6 +90,8 @@
                 </div>
                 <br>
             <button id="enviarDatosBtn" class="btn btn-success">Confirmar remito</button>
+            <button id="cambiarDatosBtn" class="btn btn-success" style="display:none;">Confirmar cambios</button>
+            <button id="cancelarBtn" class="btn btn-danger" style="display:none;">Cancelar</button>
 
             <div class="modal" id="modalDetalles" tabindex="-1" role="dialog" aria-labelledby="modalDetallesLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
@@ -172,6 +174,7 @@
         require 'footer.php';
     ?>
     <script src="./scripts/ingreso.js"></script>
+    <!-- <script src="./scripts/consultaremitos.js"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
    
 <?php

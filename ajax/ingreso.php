@@ -23,7 +23,9 @@
     case 'enviarDatosDetalleRemito':
         $registro->enviarDatosDetalleRemito();
     break;
-
+    case 'editarRemito':
+        $registro->editarRemito();
+        break;
     case 'obtenerProductosAgrupados':
         $registro->obtenerProductosAgrupados();
         break;
@@ -44,6 +46,10 @@
         break;
     case 'vaciarTemporal':
         $registro->vaciarTemporal();
+        break;
+    case 'mostrarRemito':
+        $idRemito = isset($_POST['idRemito']) ? intval($_POST['idRemito']) : 0;
+        $registro->mostrarRemito($idRemito);
         break;
 }
 

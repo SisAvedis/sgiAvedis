@@ -61,8 +61,12 @@ try {
                         "nserie" => $reg->nserie,
                         "accion" => $reg->accion,
                         "cantidad" => $reg->cantidad,
-                        "totalNP" => $reg->totalNP,
-                        "totalSP" => $reg->totalSP
+                        "totalE" => $reg->totalE,
+                        "totalD" => $reg->totalD,
+                        "totalNPE" => $reg->totalNPE,
+                        "totalSPE" => $reg->totalSPE,
+                        "totalNPD" => $reg->totalNPD,
+                        "totalSPD" => $reg->totalSPD
                     );
                 }
             

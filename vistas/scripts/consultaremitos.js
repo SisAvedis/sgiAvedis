@@ -40,7 +40,7 @@ function listarRemitos() {
 
                 $("#detallesRemitos").empty();
                 
-                var table = "<table class='table table-bordered'>" +
+                var table = "<table class='table table-bordered'" +
                                 "<thead>" +
                                     "<tr>" +
                                         "<th style='text-align: center;'>Fecha</th>" +
@@ -57,7 +57,7 @@ function listarRemitos() {
                                                 "<td style='text-align: center;'>" + item.fecha + "</td>" +
                                                 "<td style='text-align: center;'>" + item.cliente + "</td>" +
                                                 "<td style='text-align: center;'>" + item.pventa + "</td>" +
-                                                "<td style='text-align: center;'><button class='btn btn-warning' onclick='verDetalles(" + item.id + ")'>Ver detalles</button></td>" +
+                                                "<td style='text-align: center;'><button class='btn btn-warning' onclick='editarRemito(" + item.id + ")'>Editar</button><button class='btn btn-light' onclick='verDetalles(" + item.id + ")' style='margin-left:10px;'>Detalles</button></td>" +
                                              "</tr>";
                                 });
                                 
@@ -88,9 +88,31 @@ function verDetalles(idRemito) {
                 if (typeof response === 'string') {
                     response = JSON.parse(response);
                 }
-                var total = parseInt(response[0].totalSP) + parseInt(response[0].totalNP);
+                let entregas = false;
+                let devoluciones = false;
+                let totalM = 0;
+                for(var i=0;i<response.length;i++)
+                {
+                    if(response[i].accion == 'E')
+                    {
+                        entregas = true;
+                        totalM += parseInt(response[i].capacidadSuma);
+                    }
+                    if(response[i].accion == 'D')
+                    {
+                        devoluciones = true;   
+                    }
+                }
                 var detalles = "<table class='table'>";
-                detalles += "<thead id='headDetalles'><tr><th colspan='7' style='text-align: center;'>Despachado: Total: " + total + " | NP: " + response[0].totalNP + " | SP: " +  response[0].totalSP + "</th></tr>";
+                if(entregas)
+                {
+                    detalles += "<thead id='headDetalles'><tr><th colspan='7' style='text-align: center;'>Envases entregados: " + response[0].totalE + " | NP: " + response[0].totalNPE + " | SP: " +  response[0].totalSPE +  " | Volumen entregado: " + totalM + "m³" + "</th></tr>";
+                }
+                if(devoluciones)
+                {
+                    detalles += "<thead id='headDetalles'><tr><th colspan='7' style='text-align: center;'>Envases retirados: " + response[0].totalD + " | NP: " + response[0].totalNPD + " | SP: " +  response[0].totalSPD + "</th></tr>";
+
+                }
                 detalles += "<tr><th style='text-align: center;'>Producto</th><th style='text-align: center;'>Propiedad</th><th style='text-align: center;'>Accion</th><th style='text-align: center;'>Metros</th><th style='text-align: center;'>Tipo de envase</th><th style='text-align: center;'>Cantidad</th><th style='text-align: center;'>Detalles</th></tr></thead>";
                 detalles += "<tbody>";
                 response.forEach(function(item) {
@@ -129,6 +151,37 @@ function verDetalles(idRemito) {
     );
 }
 
+function editarRemito(idRemito) {
+    var fechaInicial = document.getElementById("fechai").value;
+    var fechaFinal = document.getElementById("fechaf").value;
+    $.post(
+        "../ajax/consultaremitos.php?op=editarRemito",
+        { id: idRemito },
+        function(response) {
+            try {
+                if (typeof response === 'string') {
+                    response = JSON.parse(response);
+                }
+                // Guarda el estado en sessionStorage
+                sessionStorage.setItem('mostrarCambiarDatos', true);
+                sessionStorage.setItem('idCambio', idRemito);
+                sessionStorage.setItem('fechaInicial', fechaInicial);
+                sessionStorage.setItem('fechaFinal', fechaFinal);
+                
+                // Redirigir a ingreso.php
+                window.location.href = "ingreso.php";
+            } catch (e) {
+                console.error("Error parsing JSON:", e);
+                console.error("Response received:", response);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Hubo un problema al procesar la solicitud.',
+                });
+            }
+        }
+    );
+}
 
 function verDetallesEspecificos(idtipo_producto,propiedad,accion,tipoenvase, idRemito)
 {
@@ -176,10 +229,24 @@ function cerrarMasDetallesModal() {
     $("#detallesModal").css("display", "block");
 }
 
-
-
-
-
 function cerrarModal() {
     $("#modalDetalles").modal("hide");
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Leer el estado de sessionStorage
+            const fechaInicialR = sessionStorage.getItem('fechaInicial');
+            const fechaFinalR = sessionStorage.getItem('fechaFinal');
+            var fechaInicial = document.getElementById("fechai");
+            var fechaFinal = document.getElementById("fechaf");
+
+            if (fechaInicialR && fechaFinalR) {
+
+                fechaInicial.value = fechaInicialR;
+                fechaFinal.value = fechaFinalR;
+                listarRemitos();
+                // Limpiar sessionStorage
+                sessionStorage.removeItem('fechaInicial');
+                sessionStorage.removeItem('fechaFinal');
+            }
+        });
