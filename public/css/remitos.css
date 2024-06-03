@@ -170,3 +170,19 @@ h1 {
 .alert-z-index {
     z-index: 10000 !important; /* Puedes ajustar este valor según sea necesario */
 }
+
+.suggestions {
+    display: none;
+    background-color: white;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.suggestion-item {
+    padding: 5px;
+    cursor: pointer;
+}
+
+.suggestion-item:hover {
+    background-color: #f0f0f0;
+}

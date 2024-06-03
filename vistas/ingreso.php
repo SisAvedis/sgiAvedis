@@ -174,7 +174,6 @@
         require 'footer.php';
     ?>
     <script src="./scripts/ingreso.js"></script>
-    <!-- <script src="./scripts/consultaremitos.js"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
    
 <?php

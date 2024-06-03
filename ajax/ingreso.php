@@ -51,6 +51,12 @@
         $idRemito = isset($_POST['idRemito']) ? intval($_POST['idRemito']) : 0;
         $registro->mostrarRemito($idRemito);
         break;
+    case 'buscarNserie':
+        $registro->buscarNserie();
+        break;
+    case 'completarCapacidad':
+        $registro->completarCapacidad();
+        break;
 }
 
 

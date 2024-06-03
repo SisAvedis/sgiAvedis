@@ -288,5 +288,37 @@ class Registro
             echo json_encode(['error' => 'No se encontraron datos del remito']);
         }
     }
+
+    function buscarNserie() {
+        $query = isset($_POST['query']) ? $_POST['query'] : '';
+        if (empty($query)) {
+            echo json_encode(['success' => false, 'message' => 'Query parameter is missing']);
+            return;
+        }
+        $sql = "SELECT nserie FROM envase WHERE nserie LIKE '%$query%'";
+        $result = ejecutarConsulta($sql);
+        if ($result && $result->num_rows > 0) {
+            $nseries = [];
+            while ($row = $result->fetch_assoc()) {
+                $nseries[] = $row['nserie'];
+            }
+            echo json_encode(['success' => true, 'data' => $nseries]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'No se encontraron números de serie']);
+        }
+    }
+
+    function completarCapacidad(){
+        $value = isset($_POST['value']) ? $_POST['value'] : '';
+        $sql = "SELECT capacidad FROM envase WHERE nserie = '$value'";
+        $result = ejecutarConsulta($sql);
+        if ($result && $result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            echo json_encode(['success' => true, 'capacidad' => $row['capacidad']]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'No se encontró la capacidad']);
+        }
+    }
+    
 }
 ?>

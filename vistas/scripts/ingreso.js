@@ -34,7 +34,6 @@ function listarProductos() {
             if (response.success) {
                 var options = '<option value="">Seleccione uno</option>';
                 response.data.forEach(function(producto) {
-                    //alert("ID: " + producto.idtipo_producto + " Nombre: " + producto.nombre);
                     options += '<option value="' +  producto.idtipo_producto + '">' + producto.nombre + "-" + producto.codigo + '</option>';
                 });
                 $('#tipoProducto').html(options);
@@ -58,7 +57,6 @@ function listarPuntosVenta() {
             if (response.success) {
                 var options = '<option value="">Seleccione uno</option>';
                 response.data.forEach(function(puntoVenta) {
-                    // Usar el prefijo en lugar del nombre para las opciones
                     options += '<option value="' + puntoVenta.prefijo + "-" + puntoVenta.numero + '">' + puntoVenta.prefijo + "-" + puntoVenta.numero + '</option>';
                 });
                 $('#puntoVenta').html(options);
@@ -107,7 +105,6 @@ function actualizarProductos(){
                 });
                 thead.append(headerRow);
 
-                // Llenar la tabla con los datos
                 data.forEach(function(producto) {
                     var fila = $('<tr></tr>');
 
@@ -117,10 +114,8 @@ function actualizarProductos(){
                     fila.append('<td>' + producto.cantidad + '</td>');
                     fila.append('<td>' + producto.accion + '</td>');
 
-                    // Agregar botón con ícono de ojo
                     var botonOjo = $('<button class="btn btn-warning">Detalle</button>');
                     botonOjo.on('click', function() {
-                        // Obtener datos de la fila
                         var productoSeleccionado = fila.find('td:eq(0)').text();
                         var envaseSeleccionado = fila.find('td:eq(1)').text();
                         var propiedadSeleccionada = fila.find('td:eq(2)').text();
@@ -146,7 +141,6 @@ function actualizarProductos(){
 }
 
 function verDetalle(producto, envase, propiedad, accion) {
-    // Realizar la petición AJAX para obtener los detalles
     $.ajax({
         url: '../ajax/ingreso.php?op=obtenerDetallesProducto',
         type: 'POST',
@@ -158,9 +152,7 @@ function verDetalle(producto, envase, propiedad, accion) {
             accion: accion
         },
         success: function(response) {
-            // Verificar si se recibieron datos correctamente
             if (response.success) {
-                // Mostrar los detalles en un modal
                 mostrarDetalles(response.data);
             } else {
                 console.error("Error al obtener los detalles:", response.message);
@@ -171,18 +163,13 @@ function verDetalle(producto, envase, propiedad, accion) {
         }
     });
 }
-
-// Función para mostrar los detalles en el modal
 function mostrarDetalles(data) {
-    // Limpiar el contenido del modal antes de agregar nuevos detalles
     $('#modalDetallesBody').empty();
 
-    // Crear una tabla para mostrar los detalles
     var table = $('<table class="table text-center align-middle"></table>');
     var thead = $('<thead></thead>').appendTo(table);
     var tbody = $('<tbody></tbody>').appendTo(table);
     
-    // Crear las cabeceras de la tabla
     var headers = ['N° Serie', 'Capacidad', 'Acciones'];
     var headerRow = $('<tr></tr>');
     headers.forEach(function(headerText) {
@@ -190,14 +177,12 @@ function mostrarDetalles(data) {
     });
     thead.append(headerRow);
 
-    // Llenar la tabla con los detalles recibidos
     data.forEach(function(detalle) {
         var fila = $('<tr></tr>');
 
         fila.append('<td>' + detalle.nserie + '</td>');
         fila.append('<td>' + detalle.capacidad + '</td>');
 
-        // Agregar columna de acciones con botón de eliminar
         var columnaAcciones = $('<td></td>');
         var botonEliminar = $('<button class="btn btn-danger">Eliminar</button>').click(function() {
             eliminarProducto(detalle.nserie);
@@ -208,24 +193,17 @@ function mostrarDetalles(data) {
         tbody.append(fila);
     });
 
-    // Agregar la tabla al cuerpo del modal
     $('#modalDetallesBody').append(table);
-
-    // Eliminar el texto anterior antes de agregar uno nuevo
     $('#detalleProductoInfo').remove();
 
-    // Agregar el subtítulo con el producto, envase y propiedad
     var producto = data[0].nombre_producto;
     var envase = data[0].tipoenvase;
     var propiedad = data[0].propiedad;
     var accion = data[0].accion;
     $('<div id="detalleProductoInfo">Producto: ' + producto + ' | Envase: ' + envase +  '<br>' + ' Propiedad: ' + propiedad + ' | Accion: ' + accion + '</div>').insertAfter('#modalDetallesLabel');
 
-    // Mostrar el modal
     $('#modalDetalles').css('display', 'block');
     $('#modalDetalles').modal('show').css('z-index', '1050');
-
-    
 }
 
 
@@ -255,7 +233,6 @@ function eliminarProducto(nserie)
                 nserie: nserie
             },
             success: function(response) {
-                // Verificar si se recibieron datos correctamente
                 if (!response.success) {
                     console.error("Error al obtener los detalles:", response.message);
                 } 
@@ -271,12 +248,9 @@ function eliminarProducto(nserie)
     
 }
 
-// Función para cerrar el modal
 function cerrarModal() {
     $('#modalDetalles').modal('hide');
 }
-
-
 
 function generarCampos() {
     var cantidad = parseInt($('#cantidad').val());
@@ -284,9 +258,8 @@ function generarCampos() {
     if (!isNaN(cantidad) && cantidad > 0) {
         $('#camposExtra').empty();
         var tipoProducto = $('#tipoProducto').val();
-        // Realizar la solicitud AJAX para obtener las capacidades desde la base de datos
         $.ajax({
-            url: '../ajax/ingreso.php?op=obtenerCapacidad', // Ruta del archivo PHP que manejará la solicitud AJAX
+            url: '../ajax/ingreso.php?op=obtenerCapacidad',
             type: 'POST',
             data: {
                 producto: tipoProducto
@@ -301,12 +274,12 @@ function generarCampos() {
                         options += '<option value="' + capacidad + '">' + capacidad + '</option>';
                     });
 
-                    // Generar las filas del formulario con los select de capacidad
                     for (var i = 0; i < cantidad; i++) {
                         var fila = '<div class="form-row">' +
                                     '<div class="form-group col-md-6">' +
                                         '<label for="nserie' + i + '">Nº Serie</label>' +
-                                        '<input type="number" id="nserie' + i + '" name="nserie' + i + '" class="form-control" min="1">' +
+                                        '<input type="number" id="nserie' + i + '" name="nserie' + i + '" class="form-control autocompletar" min="1" data-index="' + i + '">' +
+                                        '<div id="suggestions' + i + '" class="suggestions"></div>' +
                                     '</div>' +
                                     '<div class="form-group col-md-6">' +
                                         '<label for="capacidad' + i + '">Capacidad</label>' +
@@ -318,6 +291,8 @@ function generarCampos() {
 
                         $('#camposExtra').append(fila);
                     }
+
+                    $('.autocompletar').on('input', handleAutocomplete);
                 } else {
                     alert('Error al obtener las capacidades desde la base de datos.');
                 }
@@ -330,6 +305,74 @@ function generarCampos() {
         alert('Por favor ingresa un número válido mayor a 0 en el campo de cantidad.');
     }
 }
+
+function handleAutocomplete() {
+    var index = $(this).data('index');
+    var query = $(this).val();
+    if (query.length > 0) {
+        $.ajax({
+            url: '../ajax/ingreso.php?op=buscarNserie',
+            type: 'POST',
+            data: {
+                query: query
+            },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    var suggestions = response.data;
+                    var suggestionsList = '';
+                    suggestions.forEach(function(suggestion) {
+                        suggestionsList += '<div class="suggestion-item" data-value="' + suggestion + '">' + suggestion + '</div>';
+                    });
+                    $('#suggestions' + index).html(suggestionsList).show();
+                    
+                    $('.suggestion-item').on('click', function() {
+                        var value = $(this).data('value');
+                        $('#nserie' + index).val(value);
+                        $('#suggestions' + index).hide();
+                        $.ajax({
+                            url: '../ajax/ingreso.php?op=completarCapacidad',
+                            type: 'POST',
+                            data: {
+                                value: value
+                            },
+                            dataType: 'json',
+                            success: function(response) {
+                                if (response.success) {
+                                    var originalOptions = $('#capacidad' + index).html();
+                                    $('#capacidad' + index).html(originalOptions + '<option value="' + response.capacidad + '">' + response.capacidad + '</option>');
+                                    $('#capacidad' + index).val(response.capacidad);
+                                } else {
+                                    console.error('Error al completar la capacidad:', response.message);
+                                }
+                            },                            
+                            error: function(xhr, status, error) {
+                                console.error('Error en la solicitud AJAX:', error);
+                            }
+                        });
+                    });
+                } else {
+                    $('#suggestions' + index).hide();
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error en la solicitud AJAX:', error);
+            }
+        });
+    } else {
+        $('#suggestions' + index).hide();
+    }
+}
+
+
+
+$(document).on('click', function(event) {
+    if (!$(event.target).closest('.form-group').length) {
+        $('.suggestions').hide();
+    }
+});
+
+
 
 window.onbeforeunload = function(event) {
     $.ajax({
@@ -393,7 +436,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 });
 
-                // Limpiar sessionStorage
                 sessionStorage.removeItem('mostrarCambiarDatos');
             }else{
                 listarPuntosVenta();
@@ -430,7 +472,7 @@ $(document).ready(function() {
     });
 
     confirmBtn.on('click', function() {
-        // Obtener los valores de los campos
+        
         var tipoProducto = $('#tipoProducto').val();
         var propiedad = $('input[name="propiedad"]:checked').val();
         var propiedad2 = $('input[name="propiedad2"]:checked').val();
@@ -438,7 +480,6 @@ $(document).ready(function() {
         var accion = $('input[name="accion"]:checked').val();
         var campos = [];
     
-        // Verificar campos de radio buttons
         if (!propiedad || !propiedad2 || !accion) {
             Swal.fire({
                 icon: 'warning',
@@ -448,10 +489,9 @@ $(document).ready(function() {
                     container: 'alert-z-index'
                 },
             });
-            return; // Salir de la función si hay campos sin seleccionar
+            return;
         }
     
-        // Verificar campo de select
         if (!tipoProducto) {
             Swal.fire({
                 icon: 'warning',
@@ -461,10 +501,9 @@ $(document).ready(function() {
                     container: 'alert-z-index'
                 },
             });
-            return; // Salir de la función si el campo de select no está seleccionado
+            return; 
         }
-    
-        // Verificar cantidad (si es necesaria)
+        
         if (isNaN(cantidad) || cantidad <= 0) {
             Swal.fire({
                 icon: 'warning',
@@ -474,10 +513,9 @@ $(document).ready(function() {
                     container: 'alert-z-index'
                 },
             });
-            return; // Salir de la función si la cantidad es inválida
+            return;
         }
     
-        // Verificar campos de número de serie y capacidad
         for (var i = 0; i < cantidad; i++) {
             var nserie = $('#nserie' + i).val();
             var capacidad = $('#capacidad' + i).val();
@@ -491,13 +529,12 @@ $(document).ready(function() {
                         container: 'alert-z-index'
                     },
                 });
-                return; // Salir de la función si hay campos inválidos
+                return; 
             }
     
             campos.push({ nserie: nserie, capacidad: capacidad });
         }
     
-        // Si todos los campos están completos y válidos, enviar los datos al servidor
         $.ajax({
             url: '../ajax/ingreso.php?op=guardarTemporal',
             type: 'POST',
@@ -511,7 +548,7 @@ $(document).ready(function() {
             success: function(response) {
                 response = JSON.parse(response);
                 if (response.success) {
-                    // Limpiar los campos y ocultar el modal si la operación fue exitosa
+                    
                     $('#tipoProducto').val('');
                     $('input[name="propiedad"]:checked').prop('checked', false);
                     $('input[name="propiedad2"]:checked').prop('checked', false);
@@ -596,7 +633,7 @@ $(document).ready(function() {
     });
 
     $('#enviarDatosBtn').on('click', function() {
-        // Obtener los valores de los campos
+        
         var cliente = $('#cliente').val();
         var ncomprobante = $('#ncomprobante').val();
         var fecha = $('#fecha').val();
@@ -604,7 +641,6 @@ $(document).ready(function() {
         var estado = $('input[name="estado"]:checked').val();
         var puntoVenta = $('#puntoVenta').val();
     
-        // Verificar que los campos obligatorios no estén vacíos
         if (!cliente || !ncomprobante || !fecha || !puntoVenta || !estado) {
             Swal.fire({
                 icon: 'warning',
@@ -614,7 +650,7 @@ $(document).ready(function() {
                     container: 'alert-z-index'
                 },
             });
-            return; // Salir de la función si hay campos obligatorios vacíos
+            return; 
         }
     
         // Realizar la llamada AJAX solo si los campos obligatorios están completos
