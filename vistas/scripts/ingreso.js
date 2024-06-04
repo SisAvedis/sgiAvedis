@@ -635,7 +635,7 @@ $(document).ready(function() {
     $('#enviarDatosBtn').on('click', function() {
         
         var cliente = $('#cliente').val();
-        var ncomprobante = $('#ncomprobante').val();
+        var ncomprobante = $('#ncomprobante').val();        
         var fecha = $('#fecha').val();
         var detalles = $('#detalles').val();
         var estado = $('input[name="estado"]:checked').val();

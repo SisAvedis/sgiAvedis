@@ -102,7 +102,9 @@ try {
                 
                     echo json_encode($data);
                     break;
-            
+            case 'importarDocumento':
+                $remitos->importarDocumento();
+                break;
         
         default:
             throw new Exception('Operación no válida');

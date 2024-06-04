@@ -173,6 +173,14 @@
                   </li>'
                  ;
               }
+              if ($_COOKIE['ABM'] == 1) {
+                echo 
+                '<li class="treeview">
+                    <a href="#" onclick="subirDocumento()">
+                        <i class="fa fa-upload" aria-hidden="true"></i> <span>Importar</span>
+                    </a>
+                </li>';
+            }
             ?>                                
           
             <li>
@@ -192,3 +200,5 @@
         </section>
         <!-- /.sidebar -->
       </aside>
+      <script src="./scripts/consultaremitos.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>

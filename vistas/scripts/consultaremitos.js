@@ -233,6 +233,7 @@ function cerrarModal() {
     $("#modalDetalles").modal("hide");
 }
 
+
 document.addEventListener('DOMContentLoaded', function() {
     // Leer el estado de sessionStorage
             const fechaInicialR = sessionStorage.getItem('fechaInicial');
@@ -250,3 +251,107 @@ document.addEventListener('DOMContentLoaded', function() {
                 sessionStorage.removeItem('fechaFinal');
             }
         });
+
+        function subirDocumento() {
+            var input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.xlsx,.xls';
+            input.onchange = function(event) {
+                var archivo = event.target.files[0]; 
+                if (archivo) {
+                    console.log('Archivo seleccionado:', archivo.name, archivo.size);
+                    alert('Archivo seleccionado: ' + archivo.name);
+                    leerExcel(archivo);
+                }
+            };
+            input.click();
+        }
+
+        function leerExcel(archivo) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var data = new Uint8Array(e.target.result);
+                var workbook = XLSX.read(data, { type: 'array' });
+
+                var hoja = workbook.Sheets[workbook.SheetNames[0]];
+                var jsonData = XLSX.utils.sheet_to_json(hoja, { header: 1 });
+                procesarDatos(jsonData);
+            };
+            reader.readAsArrayBuffer(archivo);
+        }
+
+        function procesarDatos(data) {
+            var remitos = [];
+            var fechaActual = new Date();
+            var fechaActualFormatted = fechaActual.getFullYear() + '-' + 
+                                        ('0' + (fechaActual.getMonth() + 1)).slice(-2) + '-' + 
+                                        ('0' + fechaActual.getDate()).slice(-2) + ' ' + 
+                                        ('0' + fechaActual.getHours()).slice(-2) + ':' + 
+                                        ('0' + fechaActual.getMinutes()).slice(-2) + ':' + 
+                                        ('0' + fechaActual.getSeconds()).slice(-2);
+            
+            for (var i = 1; i < data.length; i++) {
+                var fila = data[i];
+                var pventa = '';
+                
+                var numero = parseFloat(fila[1]);
+                var pventa = parseFloat(fila[3]);
+                
+                if (numero > 300000 && fila[3] === 'TECNO') {
+                    pventa = 'AV-00007';
+                } else if (numero < 10000 && numero > 999 && fila[3] === 'TECNO') {
+                    pventa = 'AV-00011';
+                } else if (fila[3] === 'RESPITEC') {
+                    pventa = 'RE-00001';
+                } else if(fila[3] === 'IAG'){
+                    pventa = 'IAG-00001';
+                } else {
+                    pventa = '-';
+                }
+        
+                var remito = {
+                    idusuario: '-',
+                    clasificacion: fila[5], // CONCEPTO
+                    numero: fila[1],        // REMITO
+                    fecha_hora: fechaActualFormatted,
+                    fecha_remito: fila[0],  // FECHA
+                    estado: 1,
+                    cliente: fila[2],       // RAZON SOCIAL
+                    informacion: '-',
+                    pventa: pventa          // PVENTA
+                };
+                remitos.push(remito);
+            }
+        
+            enviarDatosAlServidor(remitos);
+        }
+        
+        
+        
+        
+
+        function enviarDatosAlServidor(remitos) {
+            fetch('../ajax/consultaremitos.php?op=importarDocumento', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(remitos)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Éxito:', data);
+                    alert('Datos guardados correctamente');
+                } else {
+                    console.error('Error en la respuesta del servidor:', data.message);
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch((error) => {
+                console.error('Error en la solicitud:', error);
+                alert('Error al guardar los datos');
+            });
+        }
+        
+        

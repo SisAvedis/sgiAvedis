@@ -15,6 +15,11 @@
     <link rel="stylesheet" href="../public/css/remitos.css">
   </head>
     <div class="content-wrapper">
+        <div class="box-header with-border">
+            <h1 class="box-title" style="display:none;">Consulta remitos <button class="btn btn-success" id="btnagregar" onclick="mostrarform(true)"><i class="fa fa-plus-circle"></i> Agregar</button></h1>
+                <div class="box-tools pull-right">
+            </div>
+        </div>
         <div class="content">
             <div class="row" style="margin-top:10px;margin-right:0px;">
                 
@@ -57,8 +62,7 @@
                     <!-- Aquí se agregarán las filas de campos dinámicamente -->
                 </div>
             </div>
-               
-
+            
             <div class="modal" id="modalDetalles" tabindex="-1" role="dialog" aria-labelledby="modalDetallesLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">

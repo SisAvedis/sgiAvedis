@@ -166,7 +166,6 @@ class Registro
         $propiedad = $_POST["propiedad"];
         $accion = $_POST["accion"];
 
-        // Crear la consulta SQL para obtener los detalles del producto
         $sql = "SELECT dt.tipoproducto, tp.nombre AS nombre_producto, dt.tipoenvase, dt.propiedad, dt.nserie, dt.capacidad, dt.accion
         FROM detalle_temporal dt
         INNER JOIN tipo_producto tp ON dt.tipoproducto = tp.idtipo_producto

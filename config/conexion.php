@@ -19,7 +19,9 @@
         {
             global $conexion;
 			$query = $conexion->query($sql);
-
+            if (!$query) {
+                return $conexion->error;
+            }
             return $query;
         }
 
@@ -35,10 +37,14 @@
         function ejecutarConsulta_retornarID($sql)
         {
             global $conexion;
-            $query = $conexion->query($sql);
-            echo $query;
-            return $conexion->insert_id;
+            if ($conexion->query($sql)) {
+                return $conexion->insert_id;
+            } else {
+                return null;
+            }
         }
+
+
 
         function limpiarCadena($str)
         {
