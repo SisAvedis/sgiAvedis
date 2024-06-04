@@ -293,10 +293,23 @@ document.addEventListener('DOMContentLoaded', function() {
             for (var i = 1; i < data.length; i++) {
                 var fila = data[i];
                 var pventa = '';
+                var envase = '';
                 
                 var numero = parseFloat(fila[1]);
                 var pventa = parseFloat(fila[3]);
-                
+
+                if(fila[7] === 'O2 TERMO' || fila[7] === 'N2 TERMO')
+                {
+                    envase = 'TER'
+                }
+                else if(fila[7] === 'CO2 GRANEL' || fila[7] === 'O2 GRANEL')
+                {
+                    envase = 'GRANEL'
+                }
+                else
+                {
+                    envase = 'CIL'
+                }
                 if (numero > 300000 && fila[3] === 'TECNO') {
                     pventa = 'AV-00007';
                 } else if (numero < 10000 && numero > 999 && fila[3] === 'TECNO') {
@@ -318,7 +331,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     estado: 1,
                     cliente: fila[2],       // RAZON SOCIAL
                     informacion: '-',
-                    pventa: pventa          // PVENTA
+                    pventa: pventa,          // PVENTA
+                    envase: envase
                 };
                 remitos.push(remito);
             }
