@@ -372,8 +372,6 @@ $(document).on('click', function(event) {
     }
 });
 
-
-
 window.onbeforeunload = function(event) {
     $.ajax({
         url: '../ajax/ingreso.php?op=vaciarTemporal',
@@ -403,14 +401,16 @@ document.addEventListener('DOMContentLoaded', function() {
                     success: function(response) {
                         
                         var remitoData = JSON.parse(response);
-                        if (remitoData.clasificacion === 'B') {
-                            document.querySelector('input[name="estado"][value="B"]').checked = true;
-                        } else if (remitoData.clasificacion === 'N') {
-                            document.querySelector('input[name="estado"][value="N"]').checked = true;
+                        if (remitoData.clasificacion === 'BB') {
+                            document.querySelector('input[name="estado"][value="BB"]').checked = true;
+                        } else if (remitoData.clasificacion === 'NN') {
+                            document.querySelector('input[name="estado"][value="NN"]').checked = true;
                         }
                         var selectPuntoVenta = document.getElementById('puntoVenta');
+                        var selectPuntoEntrega = document.getElementById('puntoEntrega');
                         var selectCliente = document.getElementById('cliente');
                         var puntoVentaRemito = remitoData.pventa;
+                        var puntoEntregaRemito = remitoData.pentrega;
                         var clienteRemito = remitoData.cliente;
                         for (var i = 1; i < selectPuntoVenta.options.length; i++) {
                             var option = selectPuntoVenta.options[i];
@@ -426,13 +426,20 @@ document.addEventListener('DOMContentLoaded', function() {
                                 break;
                             }
                         }
+                        for (var i = 1; i < selectPuntoEntrega.options.length; i++) {
+                            var option = selectPuntoEntrega.options[i];
+                            if (option.value == puntoEntregaRemito) {
+                                option.selected = true;
+                                break;
+                            }
+                        }
                         document.getElementById('ncomprobante').value = remitoData.numero;
                         var fecha = new Date(remitoData.fecha_remito);
                         var formattedDate = fecha.toISOString().split('T')[0];
                         document.getElementById('fecha').value = formattedDate;
                     },
                     error: function(xhr, status, error) {
-                        console.error('Error en la petición AJAX:', error);
+                        
                     }
                 });
 
@@ -640,8 +647,9 @@ $(document).ready(function() {
         var detalles = $('#detalles').val();
         var estado = $('input[name="estado"]:checked').val();
         var puntoVenta = $('#puntoVenta').val();
+        var puntoEntrega = $('#puntoEntrega').val();
     
-        if (!cliente || !ncomprobante || !fecha || !puntoVenta || !estado) {
+        if (!cliente || !ncomprobante || !fecha || !puntoVenta || !estado || !puntoEntrega) {
             Swal.fire({
                 icon: 'warning',
                 title: 'Campos obligatorios vacíos',
@@ -653,7 +661,6 @@ $(document).ready(function() {
             return; 
         }
     
-        // Realizar la llamada AJAX solo si los campos obligatorios están completos
         $.ajax({
             url: '../ajax/ingreso.php?op=enviarDatosDetalleRemito',
             type: 'POST',
@@ -663,6 +670,7 @@ $(document).ready(function() {
                 ncomprobante: ncomprobante,
                 estado: estado,
                 puntoVenta: puntoVenta,
+                puntoEntrega: puntoEntrega,
                 fecha: fecha
             },
             success: function(response) {

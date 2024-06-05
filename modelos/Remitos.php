@@ -53,61 +53,79 @@ class Remitos {
         return ejecutarConsulta($sql);
     }
 
-    public function importarDocumento()
-    {
-    $idusuario = isset($_COOKIE['idusuario']) ? $_COOKIE['idusuario'] : '';
-    $response = array("success" => false, "message" => "No se recibieron datos");
-    $data = json_decode(file_get_contents('php://input'), true);
-
-    if ($data) {
-        $success = true;
-        foreach ($data as $remito) {
-            $clasificacion = $remito['clasificacion'];
-            $numero = $remito['numero'];
-            $fecha_hora = $remito['fecha_hora'];
-            $fecha_remito = excelToDate($remito['fecha_remito']);
-            $estado = $remito['estado'];
-            $cliente = $remito['cliente'];
-            $informacion = $remito['informacion'];
-            $pventa = $remito['pventa'];
-
-            // Verificar si el cliente ya existe en la base de datos
-            $sql = "SELECT idcliente FROM cliente WHERE nombre = '$cliente'";
-            $resultadoCliente = ejecutarConsultaSimpleFila($sql);
-
-            if (!$resultadoCliente) {
-                $sqlInsertCliente = "INSERT INTO cliente (nombre, direccion, localidad, condicion) VALUES ('$cliente', '-', '-', '1')";
-                $idcliente = ejecutarConsulta_retornarID($sqlInsertCliente); // Aquí debes proporcionar el resultado de la inserción
-            } else {
-                $idcliente = $resultadoCliente['idcliente'];
-            }
-            
-
-            $sqlInsertRemito = "INSERT INTO remito (idusuario, clasificacion, numero, fecha_hora, fecha_remito, estado, cliente, informacion, pventa) VALUES ('$idusuario', '$clasificacion', '$numero', '$fecha_hora', '$fecha_remito', '$estado', '$idcliente', '$informacion', '$pventa')";
-            $resultadoInsertRemito = ejecutarConsulta($sqlInsertRemito);
-            if ($resultadoInsertRemito !== true) {
-                $success = false;
-                $response['message'] = 'Error al guardar los datos del remito en la base de datos: ' . $resultadoInsertRemito;
-                break;
-            }
-        }
-
-        if ($success) {
-            $response = array("success" => true, "message" => "Datos guardados correctamente");
-        }
-    } else {
-        $response['message'] = 'No se recibieron datos válidos';
-    }
-
-    header('Content-Type: application/json');
-    echo json_encode($response);
-}
-
-
-
-
-
+    public function importarDocumento() {
+        $idusuario = isset($_COOKIE['idusuario']) ? $_COOKIE['idusuario'] : '';
+        $response = array("success" => false, "message" => "No se recibieron datos");
+        $data = json_decode(file_get_contents('php://input'), true);
     
+        if ($data) {
+            $success = true;
+            foreach ($data as $remito) {
+                $clasificacion = !empty($remito['clasificacion']) ? $remito['clasificacion'] : '-';
+                $numero = !empty($remito['numero']) ? $remito['numero'] : '-';
+                $fecha_hora = !empty($remito['fecha_hora']) ? $remito['fecha_hora'] : '-';
+                $fecha_remito = !empty($remito['fecha_remito']) ? excelToDate($remito['fecha_remito']) : '-';
+                $estado = !empty($remito['estado']) ? $remito['estado'] : '-';
+                $cliente = !empty($remito['cliente']) ? $remito['cliente'] : '-';
+                $informacion = !empty($remito['informacion']) ? $remito['informacion'] : '-';
+                $pventa = !empty($remito['pventa']) ? $remito['pventa'] : '-';
+                
+                $sql = "SELECT idcliente FROM cliente WHERE nombre = '$cliente'";
+                $resultadoCliente = ejecutarConsultaSimpleFila($sql);
+    
+                if (!$resultadoCliente) {
+                    $sqlInsertCliente = "INSERT INTO cliente (nombre, direccion, localidad, condicion) VALUES ('$cliente', '-', '-', '1')";
+                    $idcliente = ejecutarConsulta_retornarID($sqlInsertCliente);
+                } else {
+                    $idcliente = $resultadoCliente['idcliente'];
+                }
+    
+                $sqlInsertRemito = "INSERT INTO remito (idusuario, clasificacion, numero, fecha_hora, fecha_remito, estado, cliente, informacion, pventa) VALUES ('$idusuario', '$clasificacion', '$numero', '$fecha_hora', '$fecha_remito', '$estado', '$idcliente', '$informacion', '$pventa')";
+                $resultadoInsertRemito = ejecutarConsulta($sqlInsertRemito);
+                if ($resultadoInsertRemito !== true) {
+                    $success = false;
+                    $response['message'] = 'Error al guardar los datos del remito en la base de datos: ' . $resultadoInsertRemito;
+                    break;
+                } else {
+                    $sqlIDRemito = "SELECT idremito FROM remito ORDER BY idremito DESC LIMIT 1";
+                    $resultado = ejecutarConsultaSimpleFila($sqlIDRemito);
+                    $idremito = (float)$resultado['idremito'];
+    
+                    foreach ($remito['detalles'] as $detalle) {
+                        $nombre = $detalle['nombre'];
+                        $envase = $detalle['envase'];
+                        $accion = $detalle['accion'];
+                    
+                        $propiedad = isset($detalle['propiedad']) ? $detalle['propiedad'] : '-';
+                        
+                        $serie = isset($detalle['serie']) ? $detalle['serie'] : array(); // Si 'serie' no está definido, asignar un array vacío
+                    
+                        $sqlIDProducto = "SELECT idtipo_producto FROM tipo_producto WHERE nombre = '$nombre'";
+                        $resultado = ejecutarConsultaSimpleFila($sqlIDProducto);
+                        $idproducto = (float)$resultado['idtipo_producto'];
+                    
+                        foreach ($serie as $nser) {
+                            $sqlInsertarDetalleRemito = "INSERT INTO detalle_remito (idremito, idtipo_producto, capacidad, propiedad, tipoenvase, nserie, accion) VALUES ('$idremito','$idproducto','1','$propiedad','$envase','$nser','$accion')";
+                            ejecutarConsulta($sqlInsertarDetalleRemito);
+                        }
+                    }
+                    
+                }
+            }
+    
+            if ($success) {
+                $response["success"] = true;
+                $response["message"] = "Datos importados correctamente";
+            }
+        } else {
+            $response["message"] = "Datos no válidos";
+        }
+    
+        echo json_encode($response);
+    }
+    
+    
+
 }
 
 function excelToDate($excelDate) {

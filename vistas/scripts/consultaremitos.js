@@ -53,7 +53,7 @@ function listarRemitos() {
 
                                 response.forEach(function(item) {
                                     table += "<tr>" +
-                                                "<td style='display: none;'>" + item.id + "</td>" + // Oculta la columna ID
+                                                "<td style='display: none;'>" + item.id + "</td>" + 
                                                 "<td style='text-align: center;'>" + item.fecha + "</td>" +
                                                 "<td style='text-align: center;'>" + item.cliente + "</td>" +
                                                 "<td style='text-align: center;'>" + item.pventa + "</td>" +
@@ -137,7 +137,7 @@ function verDetalles(idRemito) {
                 detalles += "</tbody></table>";
 
                 $("#detallesContainer").html(detalles);
-                $("#detallesModal").css("display", "block"); // Muestra el modal
+                $("#detallesModal").css("display", "block"); 
             } catch (e) {
                 console.error("Error parsing JSON:", e);
                 console.error("Response received:", response);
@@ -162,13 +162,12 @@ function editarRemito(idRemito) {
                 if (typeof response === 'string') {
                     response = JSON.parse(response);
                 }
-                // Guarda el estado en sessionStorage
+                
                 sessionStorage.setItem('mostrarCambiarDatos', true);
                 sessionStorage.setItem('idCambio', idRemito);
                 sessionStorage.setItem('fechaInicial', fechaInicial);
                 sessionStorage.setItem('fechaFinal', fechaFinal);
                 
-                // Redirigir a ingreso.php
                 window.location.href = "ingreso.php";
             } catch (e) {
                 console.error("Error parsing JSON:", e);
@@ -205,7 +204,7 @@ function verDetallesEspecificos(idtipo_producto,propiedad,accion,tipoenvase, idR
                 detalles += "</tbody></table>";
                 
                 $("#masDetallesContainer").html(detalles);
-                $("#masDetallesModal").css("display", "block"); // Muestra el modal
+                $("#masDetallesModal").css("display", "block"); 
                 $("#detallesModal").css("display", "none");
             } catch (e) {
                 console.error("Error parsing JSON:", e);
@@ -221,11 +220,11 @@ function verDetallesEspecificos(idtipo_producto,propiedad,accion,tipoenvase, idR
 }
 
 function cerrarDetallesModal() {
-    $("#detallesModal").css("display", "none"); // Oculta el modal
+    $("#detallesModal").css("display", "none"); 
 }
 
 function cerrarMasDetallesModal() {
-    $("#masDetallesModal").css("display", "none"); // Oculta el modal
+    $("#masDetallesModal").css("display", "none"); 
     $("#detallesModal").css("display", "block");
 }
 
@@ -235,7 +234,7 @@ function cerrarModal() {
 
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Leer el estado de sessionStorage
+    
             const fechaInicialR = sessionStorage.getItem('fechaInicial');
             const fechaFinalR = sessionStorage.getItem('fechaFinal');
             var fechaInicial = document.getElementById("fechai");
@@ -246,7 +245,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 fechaInicial.value = fechaInicialR;
                 fechaFinal.value = fechaFinalR;
                 listarRemitos();
-                // Limpiar sessionStorage
+                
                 sessionStorage.removeItem('fechaInicial');
                 sessionStorage.removeItem('fechaFinal');
             }
@@ -257,29 +256,28 @@ document.addEventListener('DOMContentLoaded', function() {
             input.type = 'file';
             input.accept = '.xlsx,.xls';
             input.onchange = function(event) {
-                var archivo = event.target.files[0]; 
+                var archivo = event.target.files[0];
                 if (archivo) {
                     console.log('Archivo seleccionado:', archivo.name, archivo.size);
-                    alert('Archivo seleccionado: ' + archivo.name);
                     leerExcel(archivo);
                 }
             };
             input.click();
         }
-
+        
         function leerExcel(archivo) {
             var reader = new FileReader();
             reader.onload = function(e) {
                 var data = new Uint8Array(e.target.result);
                 var workbook = XLSX.read(data, { type: 'array' });
-
+        
                 var hoja = workbook.Sheets[workbook.SheetNames[0]];
                 var jsonData = XLSX.utils.sheet_to_json(hoja, { header: 1 });
                 procesarDatos(jsonData);
             };
             reader.readAsArrayBuffer(archivo);
         }
-
+        
         function procesarDatos(data) {
             var remitos = [];
             var fechaActual = new Date();
@@ -290,60 +288,131 @@ document.addEventListener('DOMContentLoaded', function() {
                                         ('0' + fechaActual.getMinutes()).slice(-2) + ':' + 
                                         ('0' + fechaActual.getSeconds()).slice(-2);
             
+            var remitosMap = {};
+        
             for (var i = 1; i < data.length; i++) {
                 var fila = data[i];
-                var pventa = '';
-                var envase = '';
+                var remitoNumero = fila[1];
+        
+                if (!remitosMap[remitoNumero]) {
+                    remitosMap[remitoNumero] = {
+                        idusuario: '-',
+                        clasificacion: fila[5], // CONCEPTO
+                        numero: fila[1],        // REMITO
+                        fecha_hora: fechaActualFormatted,
+                        fecha_remito: fila[0],  // FECHA
+                        estado: 1,
+                        cliente: fila[2],       // RAZON SOCIAL
+                        informacion: '-',
+                        pventa: fila[3],        // PVENTA
+                        detalles: []
+                    };
+                }
+        
+                var control = 11;
+                var serie = [];
+                var cantidad = parseFloat(fila[8]);
                 
-                var numero = parseFloat(fila[1]);
-                var pventa = parseFloat(fila[3]);
 
-                if(fila[7] === 'O2 TERMO' || fila[7] === 'N2 TERMO')
-                {
-                    envase = 'TER'
+                if (cantidad === 0 || fila[7].includes('TERMO') || fila[7].includes('GRANEL')) {
+                    serie.push(0);
+                } else {
+                    for (var j = 0; j < cantidad; j++) {
+                        var control_serie = fila[control];
+                        if (control_serie === undefined) {
+                            control++;
+                            j--;
+                        } else {
+                            serie.push(fila[control]);
+                            control++;
+                        }
+                    }
                 }
-                else if(fila[7] === 'CO2 GRANEL' || fila[7] === 'O2 GRANEL')
-                {
-                    envase = 'GRANEL'
+        
+                var envase;
+                var propiedadEnvase = '-';
+                if (['O2 TERMO', 'N2 TERMO'].includes(fila[7])) {
+                    envase = 'TER';
+                } else if (['CO2 GRANEL', 'O2 GRANEL'].includes(fila[7])) {
+                    envase = 'GRANEL';
+                } else {
+                    envase = 'CIL';
                 }
-                else
-                {
-                    envase = 'CIL'
+        
+                var nombre, codigo;
+                if (fila[7].includes('N2')) {
+                    nombre = 'NITRÓGENO';
+                    codigo = 'N2';
+                } else if (fila[7].includes('ATAL')) {
+                    nombre = 'ATAL';
+                    codigo = 'AT';
+                } else if (fila[7].includes('5')) {
+                    nombre = 'ARGON 5.0';
+                    codigo = 'ARN50';
+                } else if (fila[7].includes('ARGON')) {
+                    nombre = 'ARGÓN';
+                    codigo = 'AR';
+                } else if (fila[7].includes('CO2')) {
+                    nombre = 'DIÓXIDO DE CARBONO';
+                    codigo = 'CO2';
+                } else if (fila[7].includes('O2')) {
+                    nombre = 'OXÍGENO';
+                    codigo = 'O2';
+                } else if (fila[7].includes('C2H2')) {
+                    nombre = 'ACETILENO';
+                    codigo = 'C2H2';
+                } else if (fila[7].includes('N2O')) {
+                    nombre = 'ÓXIDO NITROSO';
+                    codigo = 'N2O';
+                } else if (fila[7].includes('CSR')) {
+                    nombre = 'CONSERVAR';
+                    codigo = 'CSR';
+                } else if (fila[7].includes('CANASTO')) {
+                    nombre = 'CANASTO';
+                    codigo = 'CTO';
                 }
-                if (numero > 300000 && fila[3] === 'TECNO') {
+        
+                if (remitoNumero > 300000 && fila[3] === 'TECNO') {
                     pventa = 'AV-00007';
-                } else if (numero < 10000 && numero > 999 && fila[3] === 'TECNO') {
+                } else if (remitoNumero < 10000 && remitoNumero > 999 && fila[3] === 'TECNO') {
                     pventa = 'AV-00011';
                 } else if (fila[3] === 'RESPITEC') {
                     pventa = 'RE-00001';
-                } else if(fila[3] === 'IAG'){
+                } else if (fila[3] === 'IAG') {
                     pventa = 'IAG-00001';
+                } else if(fila[3] === 'COMARGAS'){
+                    pventa = 'CO-00001'
                 } else {
                     pventa = '-';
                 }
-        
-                var remito = {
-                    idusuario: '-',
-                    clasificacion: fila[5], // CONCEPTO
-                    numero: fila[1],        // REMITO
-                    fecha_hora: fechaActualFormatted,
-                    fecha_remito: fila[0],  // FECHA
-                    estado: 1,
-                    cliente: fila[2],       // RAZON SOCIAL
-                    informacion: '-',
-                    pventa: pventa,          // PVENTA
-                    envase: envase
+                if(envase == 'TER' || envase == 'GRANEL')
+                {
+                    propiedadEnvase = '-'
+                }
+                else
+                {
+                    propiedadEnvase = fila[10];
+                }
+                var detalle = {
+                    nombre: nombre,
+                    codigo: codigo,
+                    envase: envase,
+                    accion: fila[6],
+                    propiedad: propiedadEnvase,
+                    cantidad: fila[8],
+                    serie: serie
                 };
-                remitos.push(remito);
+                
+                remitosMap[remitoNumero].detalles.push(detalle);
+            }
+        
+            for (var remitoNumero in remitosMap) {
+                remitos.push(remitosMap[remitoNumero]);
             }
         
             enviarDatosAlServidor(remitos);
         }
         
-        
-        
-        
-
         function enviarDatosAlServidor(remitos) {
             fetch('../ajax/consultaremitos.php?op=importarDocumento', {
                 method: 'POST',
@@ -367,5 +436,4 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert('Error al guardar los datos');
             });
         }
-        
         

@@ -1,6 +1,5 @@
 <?php
 require '../config/conexion.php';
-
 class Registro 
 {
     public function __construct()
@@ -93,9 +92,10 @@ class Registro
         $fecha = $_POST['fecha'];
         $estado = $_POST['estado'];
         $puntoVenta = $_POST['puntoVenta'];
+        $puntoEntrega = $_POST['puntoEntrega'];
         $idusuario = isset($_COOKIE['idusuario']) ? $_COOKIE['idusuario'] : '';
 
-        $sql = "INSERT INTO remito (idusuario, numero, cliente, informacion, fecha_hora, fecha_remito, clasificacion, pventa, estado) VALUES (\"$idusuario\",\"$ncomprobante\",\"$cliente\",\"$detalles\",NOW(), \"$fecha\",\"$estado\", \"$puntoVenta\", \"1\")";
+        $sql = "INSERT INTO remito (idusuario, numero, cliente, informacion, fecha_hora, fecha_remito, clasificacion, pventa, pentrega, estado) VALUES (\"$idusuario\",\"$ncomprobante\",\"$cliente\",\"$detalles\",NOW(), \"$fecha\",\"$estado\", \"$puntoVenta\", \"$puntoEntrega\", \"1\")";
         ejecutarConsulta($sql);
         $sql2 = "INSERT INTO logs (idventana_abm, idusuario, fecha_hora, consulta) VALUES ('2', '$idusuarioEditar', NOW(), '$sql');";
         ejecutarConsulta($sql2);
@@ -249,12 +249,23 @@ class Registro
         }
     }
 
-    function vaciarTemporal(){
+    public function vaciarTemporal() {
         $sql = "DELETE FROM detalle_temporal";
-        ejecutarConsulta($sql);
-        $sql = "ALTER TABLE detalle_temporal AUTO_INCREMENT = 1;";
-        ejecutarConsulta($sql);
-      
+        $resultado = ejecutarConsulta($sql);
+
+        if (strpos($resultado, 'Error') !== false) {
+            echo json_encode(['success' => false, 'message' => $resultado]);
+            exit();
+        }
+
+        $sql = "ALTER TABLE detalle_temporal AUTO_INCREMENT = 1";
+        $resultado = ejecutarConsulta($sql);
+
+        if (strpos($resultado, 'Error') !== false) {
+            echo json_encode(['success' => false, 'message' => $resultado]);
+            exit();
+        }
+
         echo json_encode(['success' => true]);
         exit();
     }

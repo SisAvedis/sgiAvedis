@@ -27,18 +27,11 @@
                     <h4>Detalles del remito</h4>
                 </div>
                 <div class="col-md-7"></div>
-                <div class="col-md-2">
-                    <label for="estado">Clasificacion</label>
-                    <div class="radio-group">
-                            <label><input type="radio" name="estado" value="B"> B</label>
-                            <label><input type="radio" name="estado" value="N"> N</label>
-                    </div>
-                </div>
             </div>
             <div class="row" style="margin-top:10px;margin-right:0px;">
-                <div class="col-md-5">
+                <div class="col-md-12">
                     <div class="row">
-                    <div class="col-md-7">
+                    <div class="col-md-4">
                             <div class="form-group">
                                 <label for="puntoVenta">P. Venta</label>
                                 <select id="puntoVenta" name="puntoVenta" class="form-control" style="font-size:14px;">
@@ -47,7 +40,18 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="col-md-5">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="puntoEntrega">P. Entrega</label>
+                                <select id="puntoEntrega" name="puntoEntrega" class="form-control" style="font-size:14px;">
+                                    <option value="">Selecciona uno</option>
+                                    <option value="AVEDIS">AVEDIS</option>
+                                    <option value="REPARTO">REPARTO</option>
+                                    <!-- Aquí se agregarán las opciones dinámicamente -->
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
                             <div class="form-group">
                                 <label for="cliente">Nº Remito</label>
                                 <input type="text" id="ncomprobante" name="ncomprobante" class="form-control">
@@ -64,12 +68,19 @@
                             </select>
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-4">
                         <div class="form-group">
                             <label for="cliente">Fecha</label>
                             <input type="date" class="form-control" name="fecha" id="fecha" value="<?php //echo date("Y-m-d");?>">
                         </div>
                     </div>
+                    <div class="col-md-4">
+                    <label for="estado">Clasificacion</label>
+                    <div class="radio-group">
+                            <label><input type="radio" name="estado" value="BB"> BB</label>
+                            <label><input type="radio" name="estado" value="NN"> NN</label>
+                    </div>
+                </div>
             </div>
             <div class="row" style="margin-right:0px;">
                 <div class="col-md-12">
