@@ -23,23 +23,31 @@
         <div class="content">
             <div class="row" style="margin-top:10px;margin-right:0px;">
                 
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="form-group">
                                 <div class="form-group">
-                                <label for="cliente">Fecha inicial</label>
+                                <label for="fechai">Fecha inicial</label>
                                 <input type="date" class="form-control" name="fechai" id="fechai" value="<?php //echo date("Y-m-d");?>">
                             </div>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="form-group">
                                     <div class="form-group">
-                                    <label for="cliente">Fecha final</label>
+                                    <label for="fechaf">Fecha final</label>
                                     <input type="date" class="form-control" name="fechaf" id="fechaf" value="<?php //echo date("Y-m-d");?>">
                                 </div>
                             </div>
                         </div>  
-                        <div class="col-md-4">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                    <div class="form-group">
+                                    <label for="nremito">Nº Remito</label>
+                                    <input type="text" class="form-control" name="nremito" id="nremito" value="">
+                                </div>
+                            </div>
+                        </div>  
+                        <div class="col-md-3">
                             <div class="form-group">
                                 <button class="btn btn-success" type="button" onclick="listarRemitos()" style="margin-top:11.5%;"><i class="fa fa-search"></i> Listar</button>
                             </div>

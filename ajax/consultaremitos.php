@@ -9,31 +9,38 @@ header('Content-Type: application/json');
 try {
     switch ($_GET["op"]) {
         case 'listarRemitos':
-            $fechai = $_POST["fechai"];
-            $fechaf = $_POST["fechaf"];
-            
-            if (empty($fechai) || empty($fechaf)) {
-                throw new Exception('Fechas no proporcionadas');
+            $fechai = isset($_POST["fechai"]) ? $_POST["fechai"] : null;
+            $fechaf = isset($_POST["fechaf"]) ? $_POST["fechaf"] : null;
+            $remito = isset($_POST["remito"]) ? $_POST["remito"] : null;
+
+            try {
+                if (empty($remito) && (empty($fechai) || empty($fechaf))) {
+                    throw new Exception("Debe indicar un rango de fechas o Nº de remito para filtrar.");
+                } else if (empty($remito)) {
+                    $rspta = $remitos->listarRemitos($fechai, $fechaf);
+                } else {
+                    $rspta = $remitos->listarRemitos2($remito);
+                }
+
+                if (!$rspta) {
+                    throw new Exception('Error al obtener los remitos');
+                }
+
+                $data = array();
+                while ($reg = $rspta->fetch_object()) {
+                    $data[] = array(
+                        "id" => $reg->idremito,
+                        "fecha" => $reg->fecha,
+                        "cliente" => $reg->cliente_nombre,
+                        "pventa" => $reg->pventa,
+                        "numero" => $reg->numero,
+                        "clasificacion" => $reg->clasificacion
+                    );
+                }
+                echo json_encode($data);
+            } catch (Exception $e) {
+                echo json_encode(['error' => $e->getMessage()]);
             }
-
-            $rspta = $remitos->listarRemitos($fechai, $fechaf);
-
-            if (!$rspta) {
-                throw new Exception('Error al obtener los remitos');
-            }
-
-            $data = array();
-
-            while ($reg = $rspta->fetch_object()) {
-                $data[] = array(
-                    "id" => $reg->idremito,
-                    "fecha" => $reg->fecha,
-                    "cliente" => $reg->cliente_nombre,
-                    "pventa" => $reg->pventa
-                );
-            }
-
-            echo json_encode($data);
             break;
 
             case 'verDetalles':
@@ -66,7 +73,8 @@ try {
                         "totalNPE" => $reg->totalNPE,
                         "totalSPE" => $reg->totalSPE,
                         "totalNPD" => $reg->totalNPD,
-                        "totalSPD" => $reg->totalSPD
+                        "totalSPD" => $reg->totalSPD,
+                        "metros" => $reg->metros
                     );
                 }
             
@@ -105,7 +113,10 @@ try {
             case 'importarDocumento':
                 $remitos->importarDocumento();
                 break;
-        
+            case 'eliminarRemito':
+                $idRemito = $_POST['id'];
+                $remitos->eliminarRemito($idRemito);
+                break;
         default:
             throw new Exception('Operación no válida');
     }

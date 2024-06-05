@@ -15,13 +15,21 @@
 
     if(!function_exists('ejecutarConsulta'))
     {
-        function ejecutarConsulta($sql)
+        /*function ejecutarConsulta($sql)
         {
             global $conexion;
 			$query = $conexion->query($sql);
             if (!$query) {
                 return $conexion->error;
             }
+            return $query;
+        }*/
+
+        function ejecutarConsulta($sql)
+        {
+            global $conexion;
+            $query = $conexion->query($sql);
+
             return $query;
         }
 

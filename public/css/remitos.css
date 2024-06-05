@@ -1,8 +1,12 @@
 
 body {
-    font-family: Arial, sans-serif;
-}
-
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-family: 'Source Sans Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 400;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
 .content {
     max-width: 800px;
     margin: 0 auto;
@@ -71,7 +75,7 @@ h1 {
 
 #bodyCard2{
     background-color: rgb(255, 255, 255);
-    width: 96%;
+    width: 97%;
     height: 300px;
     margin-right: 5%;
 }
@@ -88,6 +92,7 @@ h1 {
 
 #detallesRemitos{
     max-height: 300px; 
+    min-width: 805px;
     overflow-y: auto;
 }
 

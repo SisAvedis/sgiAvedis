@@ -110,12 +110,12 @@
             <button id="cancelarBtn" class="btn btn-danger" style="display:none;">Cancelar</button>
 
             <div class="modal" id="modalDetalles" tabindex="-1" role="dialog" aria-labelledby="modalDetallesLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
+            <div class="modal-dialog" role="document" >
+                <div class="modal-content"  style="width:650px;">
+                    <div class="modal-header"  style="width:580px;">
                         <h5 class="modal-title" id="modalDetallesLabel">Detalles del Producto</h5>
                     </div>
-                    <div class="modal-body" id="modalDetallesBody">
+                    <div class="modal-body" id="modalDetallesBody" style="width:600px;">
                         <!-- Aquí se mostrarán los detalles del producto -->
                     </div>
                     <button type="button" onclick="cerrarModal()" class="btn btn-warning" style="font-size:14px;">Cerrar</button>

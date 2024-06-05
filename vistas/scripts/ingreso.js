@@ -2,6 +2,7 @@ function init() {
     listarProductos();
     actualizarProductos();
 }
+
 function listarClientes(){
     $.ajax({
         url: '../ajax/ingreso.php?op=listarClientes',
@@ -179,17 +180,30 @@ function mostrarDetalles(data) {
 
     data.forEach(function(detalle) {
         var fila = $('<tr></tr>');
-
+    
         fila.append('<td>' + detalle.nserie + '</td>');
-        fila.append('<td>' + detalle.capacidad + '</td>');
-
+        if (detalle.capacidad != 1) {
+            fila.append('<td>' + detalle.capacidad + '</td>');
+        } else {
+            fila.append('<td><input type="text" class="form-control" id="capacidadNueva" placeholder="Ingrese la capacidad"></td>');
+        }
+    
         var columnaAcciones = $('<td></td>');
         var botonEliminar = $('<button class="btn btn-danger">Eliminar</button>').click(function() {
             eliminarProducto(detalle.nserie);
         });
+    
         columnaAcciones.append(botonEliminar);
+    
+        if (detalle.capacidad == 1) {
+            var botonGuardar = $('<button class="btn btn-success" style="margin-left: 10px;">Guardar</button>').click(function() {
+                var nuevaCapacidad = $('#capacidadNueva').val();
+                guardarCapacidad(detalle.nserie, nuevaCapacidad);
+            });
+            columnaAcciones.append(botonGuardar);
+        }
+    
         fila.append(columnaAcciones);
-
         tbody.append(fila);
     });
 
@@ -206,6 +220,26 @@ function mostrarDetalles(data) {
     $('#modalDetalles').modal('show').css('z-index', '1050');
 }
 
+
+function guardarCapacidad(nserie, nuevaCapacidad){
+    $.ajax({
+        url: '../ajax/ingreso.php?op=modificarCapacidad',
+        type: 'POST',
+        dataType: 'json',
+        data: {
+            nserie: nserie, nuevaCapacidad: nuevaCapacidad
+        },
+        success: function(response) {
+            actualizarProductos();
+            cerrarModal();
+        },
+        error: function(xhr, status, error) {
+            actualizarProductos();
+            cerrarModal();
+        }
+    });
+    actualizarProductos();
+}
 
 function eliminarProducto(nserie)
 {
@@ -373,82 +407,92 @@ $(document).on('click', function(event) {
 });
 
 window.onbeforeunload = function(event) {
-    $.ajax({
-        url: '../ajax/ingreso.php?op=vaciarTemporal',
-        type: 'POST',
-        success: function(response) {
-            console.log('Petición AJAX ejecutada con éxito:', response);
-        },
-        error: function(xhr, status, error) {
-            console.error('Error en la petición AJAX:', error);
-        }
-    });
+    // Crear un objeto XMLHttpRequest
+    var xhr = new XMLHttpRequest();
+    // Configurar la petición como síncrona
+    xhr.open("POST", "../ajax/ingreso.php?op=vaciarTemporal", false);
+    // Enviar la petición
+    xhr.send();
+    // Comprobar el estado de la respuesta
+    if (xhr.status === 200) {
+        console.log('Petición AJAX ejecutada con éxito:', xhr.responseText);
+    } else {
+        console.error('Error en la petición AJAX:', xhr.statusText);
+    }
 };
+
 
 document.addEventListener('DOMContentLoaded', function() {
     const mostrarCambiarDatos = sessionStorage.getItem('mostrarCambiarDatos');
     const idCambio = sessionStorage.getItem('idCambio');
     listarPuntosVenta();
     listarClientes();
-            if (mostrarCambiarDatos) {
-                document.getElementById('enviarDatosBtn').style.display = 'none';
-                document.getElementById('cambiarDatosBtn').style.display = 'inline-block';
-                document.getElementById('cancelarBtn').style.display = 'inline-block';
-                $.ajax({
-                    url: '../ajax/ingreso.php?op=mostrarRemito',
-                    data: { idRemito: idCambio },
-                    type: 'POST',
-                    success: function(response) {
-                        
-                        var remitoData = JSON.parse(response);
-                        if (remitoData.clasificacion === 'BB') {
-                            document.querySelector('input[name="estado"][value="BB"]').checked = true;
-                        } else if (remitoData.clasificacion === 'NN') {
-                            document.querySelector('input[name="estado"][value="NN"]').checked = true;
-                        }
-                        var selectPuntoVenta = document.getElementById('puntoVenta');
-                        var selectPuntoEntrega = document.getElementById('puntoEntrega');
-                        var selectCliente = document.getElementById('cliente');
-                        var puntoVentaRemito = remitoData.pventa;
-                        var puntoEntregaRemito = remitoData.pentrega;
-                        var clienteRemito = remitoData.cliente;
-                        for (var i = 1; i < selectPuntoVenta.options.length; i++) {
-                            var option = selectPuntoVenta.options[i];
-                            if (option.value == puntoVentaRemito) {
-                                option.selected = true;
-                                break;
-                            }
-                        }
-                        for (var i = 1; i < selectCliente.options.length; i++) {
-                            var option = selectCliente.options[i];
-                            if (option.value == clienteRemito) {
-                                option.selected = true;
-                                break;
-                            }
-                        }
-                        for (var i = 1; i < selectPuntoEntrega.options.length; i++) {
-                            var option = selectPuntoEntrega.options[i];
-                            if (option.value == puntoEntregaRemito) {
-                                option.selected = true;
-                                break;
-                            }
-                        }
-                        document.getElementById('ncomprobante').value = remitoData.numero;
-                        var fecha = new Date(remitoData.fecha_remito);
-                        var formattedDate = fecha.toISOString().split('T')[0];
-                        document.getElementById('fecha').value = formattedDate;
-                    },
-                    error: function(xhr, status, error) {
-                        
-                    }
-                });
+    if (mostrarCambiarDatos) {
+        
+        alert('IDCambio: ' + idCambio);
+        document.getElementById('enviarDatosBtn').style.display = 'none';
+        document.getElementById('cambiarDatosBtn').style.display = 'inline-block';
+        document.getElementById('cancelarBtn').style.display = 'inline-block';
+        $.ajax({
+            url: '../ajax/ingreso.php?op=mostrarRemito',
+            data: { idRemito: idCambio },
+            type: 'POST',
+            success: function(response) {
+                var remitoData = JSON.parse(response);
+                if (remitoData.clasificacion === 'BB') {
+                    document.querySelector('input[name="estado"][value="BB"]').checked = true;
+                } else if (remitoData.clasificacion === 'NN') {
+                    document.querySelector('input[name="estado"][value="NN"]').checked = true;
+                }
+                var selectPuntoVenta = document.getElementById('puntoVenta');
+                var selectPuntoEntrega = document.getElementById('puntoEntrega');
+                var selectCliente = document.getElementById('cliente');
+                var puntoVentaRemito = remitoData.pventa;
+                var puntoEntregaRemito = remitoData.pentrega;
+                var clienteRemito = remitoData.cliente;
 
+                for (var i = 1; i < selectPuntoVenta.options.length; i++) {
+                    var option = selectPuntoVenta.options[i];
+                    if (option.value == puntoVentaRemito) {
+                        option.selected = true;
+                        break;
+                    }
+                }
+                for (var i = 1; i < selectCliente.options.length; i++) {
+                    var option = selectCliente.options[i];
+                    if (option.value == clienteRemito) {
+                        option.selected = true;
+                        break;
+                    }
+                }
+                for (var i = 1; i < selectPuntoEntrega.options.length; i++) {
+                    var option = selectPuntoEntrega.options[i];
+                    if (option.value == puntoEntregaRemito) {
+                        option.selected = true;
+                        break;
+                    }
+                }
+                document.getElementById('ncomprobante').value = remitoData.numero;
+                var fecha = new Date(remitoData.fecha_remito);
+                var formattedDate = fecha.toISOString().split('T')[0];
+                document.getElementById('fecha').value = formattedDate;
                 sessionStorage.removeItem('mostrarCambiarDatos');
-            }else{
-                listarPuntosVenta();
-                listarClientes();
+                sessionStorage.removeItem('idCambio');
+                actualizarProductos();
+                
+            },
+            error: function(xhr, status, error) {
             }
         });
+    } else {
+        listarPuntosVenta();
+        listarClientes();
+        sessionStorage.removeItem('mostrarCambiarDatos');
+        sessionStorage.removeItem('idCambio');
+    }
+    
+});
+
 
 $(document).ready(function() {
     init();

@@ -1,5 +1,6 @@
 <?php
 require '../config/conexion.php';
+
 class Registro 
 {
     public function __construct()
@@ -249,23 +250,12 @@ class Registro
         }
     }
 
-    public function vaciarTemporal() {
+    function vaciarTemporal(){
         $sql = "DELETE FROM detalle_temporal";
-        $resultado = ejecutarConsulta($sql);
-
-        if (strpos($resultado, 'Error') !== false) {
-            echo json_encode(['success' => false, 'message' => $resultado]);
-            exit();
-        }
-
-        $sql = "ALTER TABLE detalle_temporal AUTO_INCREMENT = 1";
-        $resultado = ejecutarConsulta($sql);
-
-        if (strpos($resultado, 'Error') !== false) {
-            echo json_encode(['success' => false, 'message' => $resultado]);
-            exit();
-        }
-
+        ejecutarConsulta($sql);
+        $sql = "ALTER TABLE detalle_temporal AUTO_INCREMENT = 1;";
+        ejecutarConsulta($sql);
+      
         echo json_encode(['success' => true]);
         exit();
     }
@@ -328,6 +318,13 @@ class Registro
         } else {
             echo json_encode(['success' => false, 'message' => 'No se encontró la capacidad']);
         }
+    }
+
+    public function modificarCapacidad(){
+        $nserie = isset($_POST['nserie']) ? $_POST['nserie'] : '';
+        $nuevaCapacidad = isset($_POST['nuevaCapacidad']) ? $_POST['nuevaCapacidad'] : '';
+        $sql = "UPDATE detalle_temporal SET capacidad = '$nuevaCapacidad' WHERE nserie = '$nserie'";
+        ejecutarConsulta($sql);
     }
     
 }

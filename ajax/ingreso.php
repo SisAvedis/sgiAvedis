@@ -57,6 +57,9 @@
     case 'completarCapacidad':
         $registro->completarCapacidad();
         break;
+    case 'modificarCapacidad':
+        $registro->modificarCapacidad();
+        break;
 }
 
 

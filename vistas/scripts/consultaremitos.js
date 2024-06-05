@@ -1,83 +1,165 @@
 function listarRemitos() {
-    var fechaInicial = document.getElementById("fechai").value;
-    var fechaFinal = document.getElementById("fechaf").value;
+    var fechaInicial = document.getElementById("fechai");
+    var fechaFinal = document.getElementById("fechaf");
+    var nremitoBuscado = document.getElementById("nremito");
 
-    if (!fechaInicial || !fechaFinal) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Por favor, seleccione ambas fechas.',
-        });
-        return;
-    }
+    if (nremitoBuscado.value != '') {
+        $.post(
+            "../ajax/consultaremitos.php?op=listarRemitos",
+            { remito: nremitoBuscado.value },
+            function(response) {
+                try {
+                    if (typeof response === 'string') {
+                        response = JSON.parse(response);
+                    }
 
-    $.post(
-        "../ajax/consultaremitos.php?op=listarRemitos",
-        { fechai: fechaInicial, fechaf: fechaFinal },
-        function(response) {
-            try {
-                if (typeof response === 'string') {
-                    response = JSON.parse(response);
-                }
+                    if (response.error) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: response.error,
+                        });
+                        return;
+                    }
 
-                if (response.error) {
+                    if (response.length === 0) {
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Sin resultados',
+                            text: 'No hay un remito con el numero indicado.',
+                        });
+                        return;
+                    }
+
+                    $("#detallesRemitos").empty();
+
+                    var table = "<table class='table table-bordered'>" +
+                        "<thead>" +
+                        "<tr>" +
+                        "<th style='text-align: center;'>Fecha</th>" +
+                        "<th style='text-align: center;'>Nº Remito</th>" +
+                        "<th style='text-align: center;'>Clasificación</th>" +
+                        "<th style='text-align: center;'>Cliente</th>" +
+                        "<th style='text-align: center;'>Punto de venta</th>" +
+                        "<th style='text-align: center;'>Acciones</th>" +
+                        "</tr>" +
+                        "</thead>" +
+                        "<tbody>";
+
+                    response.forEach(function(item) {
+                        table += "<tr>" +
+                            "<td style='display: none;'>" + item.id + "</td>" +
+                            "<td style='text-align: center;'>" + item.fecha + "</td>" +
+                            "<td style='text-align: center;'>" + item.numero + "</td>" +
+                            "<td style='text-align: center;'>" + item.clasificacion + "</td>" +
+                            "<td style='text-align: center;'>" + item.cliente + "</td>" +
+                            "<td style='text-align: center;'>" + item.pventa + "</td>" +
+                            "<td style='text-align: center;'><button class='btn btn-warning' onclick='editarRemito(" + item.id + ")' data-toggle='tooltip' title='Editar'><i class='fa fa-pencil' aria-hidden='true'></i></button><button class='btn btn-light' onclick='verDetalles(" + item.id + ")' style='margin-left:10px;' data-toggle='tooltip' title='Ver detalle'><i class='fa fa-eye' aria-hidden='true'></i></button><button class='btn btn-danger' onclick='eliminarRemito(" + item.id + ")' style='margin-left:10px;' data-toggle='tooltip' title='Eliminar'><i class='fa fa-trash' aria-hidden='true'></i></button></td>" +
+                            "</tr>";
+                    });
+
+                    table += "</tbody></table>";
+
+                    $("#detallesRemitos").append(table);
+                    $("#historial").show();
+                    nremitoBuscado.value = '';
+                    fechaInicial.value = '';
+                    fechaFinal.value = '';
+                } catch (e) {
+                    console.error("Error parsing JSON:", e);
+                    console.error("Response received:", response);
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
-                        text: response.error,
+                        text: 'Hubo un problema al procesar la solicitud.',
                     });
-                    return;
                 }
-
-                if (response.length === 0) {
-                    Swal.fire({
-                        icon: 'info',
-                        title: 'Sin resultados',
-                        text: 'No se encontraron remitos en el rango de fechas seleccionado.',
-                    });
-                    return;
-                }
-
-                $("#detallesRemitos").empty();
-                
-                var table = "<table class='table table-bordered'" +
-                                "<thead>" +
-                                    "<tr>" +
-                                        "<th style='text-align: center;'>Fecha</th>" +
-                                        "<th style='text-align: center;'>Cliente</th>" +
-                                        "<th style='text-align: center;'>Punto de venta</th>" +
-                                        "<th style='text-align: center;'>Acciones</th>" +
-                                    "</tr>" +
-                                "</thead>" +
-                                "<tbody>";
-
-                                response.forEach(function(item) {
-                                    table += "<tr>" +
-                                                "<td style='display: none;'>" + item.id + "</td>" + 
-                                                "<td style='text-align: center;'>" + item.fecha + "</td>" +
-                                                "<td style='text-align: center;'>" + item.cliente + "</td>" +
-                                                "<td style='text-align: center;'>" + item.pventa + "</td>" +
-                                                "<td style='text-align: center;'><button class='btn btn-warning' onclick='editarRemito(" + item.id + ")'>Editar</button><button class='btn btn-light' onclick='verDetalles(" + item.id + ")' style='margin-left:10px;'>Detalles</button></td>" +
-                                             "</tr>";
-                                });
-                                
-
-                table += "</tbody></table>";
-
-                $("#detallesRemitos").append(table);
-                $("#historial").show();
-            } catch (e) {
-                console.error("Error parsing JSON:", e);
-                console.error("Response received:", response);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Hubo un problema al procesar la solicitud.',
-                });
             }
+        );
+    } else {
+        if (!fechaInicial.value || !fechaFinal.value) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Por favor, seleccione ambas fechas o un Nº de remito para filtrar.',
+            });
+            return;
         }
-    );
+        $.post(
+            "../ajax/consultaremitos.php?op=listarRemitos",
+            { fechai: fechaInicial.value, fechaf: fechaFinal.value },
+            function(response) {
+                try {
+                    if (typeof response === 'string') {
+                        response = JSON.parse(response);
+                    }
+
+                    if (response.error) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: response.error,
+                        });
+                        return;
+                    }
+
+                    if (response.length === 0) {
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Sin resultados',
+                            text: 'No se encontraron remitos en el rango de fechas seleccionado.',
+                        });
+                        return;
+                    }
+
+                    $("#detallesRemitos").empty();
+
+                    var table = "<table class='table table-bordered'>" +
+                        "<thead>" +
+                        "<tr>" +
+                        "<th style='text-align: center;'>Fecha</th>" +
+                        "<th style='text-align: center;'>Nº Remito</th>" +
+                        "<th style='text-align: center;'>Clasificación</th>" +
+                        "<th style='text-align: center;'>Cliente</th>" +
+                        "<th style='text-align: center;'>Punto de venta</th>" +
+                        "<th style='text-align: center;'>Acciones</th>" +
+                        "</tr>" +
+                        "</thead>" +
+                        "<tbody>";
+
+                    response.forEach(function(item) {
+                        table += "<tr>" +
+                            "<td style='display: none;'>" + item.id + "</td>" +
+                            "<td style='text-align: center;'>" + item.fecha + "</td>" +
+                            "<td style='text-align: center;'>" + item.numero + "</td>" +
+                            "<td style='text-align: center;'>" + item.clasificacion + "</td>" +
+                            "<td style='text-align: center;'>" + item.cliente + "</td>" +
+                            "<td style='text-align: center;'>" + item.pventa + "</td>" +
+                            "<td style='text-align: center;'><button class='btn btn-warning' onclick='editarRemito(" + item.id + ")' data-toggle='tooltip' title='Editar'><i class='fa fa-pencil' aria-hidden='true'></i></button><button class='btn btn-light' onclick='verDetalles(" + item.id + ")' style='margin-left:10px;' data-toggle='tooltip' title='Ver detalle'><i class='fa fa-eye' aria-hidden='true'></i></button><button class='btn btn-danger' onclick='eliminarRemito(" + item.id + ")' style='margin-left:10px;' data-toggle='tooltip' title='Eliminar'><i class='fa fa-trash' aria-hidden='true'></i></button></td>" +
+                            "</tr>";
+                    });
+
+                    table += "</tbody></table>";
+
+                    $("#detallesRemitos").append(table);
+                    $("#historial").show();
+                    nremitoBuscado.value = '';
+                    fechaInicial.value = '';
+                    fechaFinal.value = '';
+                } catch (e) {
+                    console.error("Error parsing JSON:", e);
+                    console.error("Response received:", response);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Hubo un problema al procesar la solicitud.',
+                    });
+                }
+            }
+        );
+    }
 }
+
 
 function verDetalles(idRemito) {
     $.post(
@@ -103,16 +185,37 @@ function verDetalles(idRemito) {
                         devoluciones = true;   
                     }
                 }
+                let SumaMetros = 0;
+                response.forEach(function(item) {
+                    if(item.metros == null)
+                        {
+                            SumaMetros=-1;
+                        }
+                        else
+                        {
+                            SumaMetros += parseFloat(item.metros);
+                        }
+                    
+                });
                 var detalles = "<table class='table'>";
-                if(entregas)
+                if(SumaMetros == -1)
                 {
-                    detalles += "<thead id='headDetalles'><tr><th colspan='7' style='text-align: center;'>Envases entregados: " + response[0].totalE + " | NP: " + response[0].totalNPE + " | SP: " +  response[0].totalSPE +  " | Volumen entregado: " + totalM + "m³" + "</th></tr>";
+                    if(entregas)
+                        {
+                            detalles += "<thead id='headDetalles'><tr><th colspan='7' style='text-align: center;'> Volumen entregado: " + totalM + "m³" + "</th></tr>";
+                        }
                 }
-                if(devoluciones)
+                else
                 {
-                    detalles += "<thead id='headDetalles'><tr><th colspan='7' style='text-align: center;'>Envases retirados: " + response[0].totalD + " | NP: " + response[0].totalNPD + " | SP: " +  response[0].totalSPD + "</th></tr>";
+                    if(entregas)
+                        {
+                            detalles += "<thead id='headDetalles'><tr><th colspan='7' style='text-align: center;'> Volumen entregado: " + SumaMetros + "m³" + "</th></tr>";
+                        }
+                }
+                
+                
+                detalles += "<thead id='headDetalles'><tr><th colspan='7' style='text-align: center;'>Envases entregados: " + response[0].totalE + " | NP: " + response[0].totalNPE + " | SP: " +  response[0].totalSPE +  " | Envases retirados: " + response[0].totalD + " | NP: " + response[0].totalNPD + " | SP: " +  response[0].totalSPD + "</th></tr>";
 
-                }
                 detalles += "<tr><th style='text-align: center;'>Producto</th><th style='text-align: center;'>Propiedad</th><th style='text-align: center;'>Accion</th><th style='text-align: center;'>Metros</th><th style='text-align: center;'>Tipo de envase</th><th style='text-align: center;'>Cantidad</th><th style='text-align: center;'>Detalles</th></tr></thead>";
                 detalles += "<tbody>";
                 response.forEach(function(item) {
@@ -120,18 +223,28 @@ function verDetalles(idRemito) {
                     detalles += "<td style='text-align: center;'>" + item.nombre_tipo_producto + "</td>";
                     detalles += "<td style='text-align: center;'>" + item.propiedad + "</td>";
                     detalles += "<td style='text-align: center;'>" + item.accion + "</td>";
-                    if(item.accion == 'E')
-                        {
-                            detalles += "<td style='text-align: center;'>" + item.capacidadSuma + "</td>";
-                        }
-                        else
-                        {
-                            detalles += "<td style='text-align: center;'>" + "-" + "</td>";
-                        }
+                    if (item.metros !== null) {
+                        if(item.accion == "E")
+                            {
+                                detalles += "<td style='text-align: center;'>" + item.metros + "</td>";
+                            }else{
+                                detalles += "<td style='text-align: center;'>" + "-" + "</td>";
+                            }
+                        
+                    } else {
+                        if(item.accion == 'E')
+                            {
+                                detalles += "<td style='text-align: center;'>" + item.capacidadSuma + "</td>";
+                            }
+                            else
+                            {
+                                detalles += "<td style='text-align: center;'>" + "-" + "</td>";
+                            }
+                    }
                     
                     detalles += "<td style='text-align: center;'>" + item.tipoenvase + "</td>";
                     detalles += "<td style='text-align: center;'>" + item.cantidad + "</td>";
-                    detalles += "<td style='text-align: center;'><button class='btn btn-warning' onclick='verDetallesEspecificos(" + item.idtipo_producto + ", \"" + item.propiedad + "\", \"" + item.accion + "\", \"" + item.tipoenvase + "\", " + idRemito + ")'>Ver</button></td>";
+                    detalles += "<td style='text-align: center;'><button class='btn btn-warning' onclick='verDetallesEspecificos(" + item.idtipo_producto + ", \"" + item.propiedad + "\", \"" + item.accion + "\", \"" + item.tipoenvase + "\", " + idRemito + "," + item.metros + ")'>Ver</button></td>";
                     detalles += "</tr>";
                 });
                 detalles += "</tbody></table>";
@@ -152,37 +265,54 @@ function verDetalles(idRemito) {
 }
 
 function editarRemito(idRemito) {
-    var fechaInicial = document.getElementById("fechai").value;
-    var fechaFinal = document.getElementById("fechaf").value;
-    $.post(
-        "../ajax/consultaremitos.php?op=editarRemito",
-        { id: idRemito },
-        function(response) {
-            try {
-                if (typeof response === 'string') {
-                    response = JSON.parse(response);
-                }
-                
-                sessionStorage.setItem('mostrarCambiarDatos', true);
-                sessionStorage.setItem('idCambio', idRemito);
-                sessionStorage.setItem('fechaInicial', fechaInicial);
-                sessionStorage.setItem('fechaFinal', fechaFinal);
-                
-                window.location.href = "ingreso.php";
-            } catch (e) {
-                console.error("Error parsing JSON:", e);
-                console.error("Response received:", response);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Hubo un problema al procesar la solicitud.',
-                });
-            }
-        }
-    );
+    sessionStorage.setItem('mostrarCambiarDatos', true);
+    sessionStorage.setItem('idCambio', idRemito);
+    window.location.href = "ingreso.php";
 }
 
-function verDetallesEspecificos(idtipo_producto,propiedad,accion,tipoenvase, idRemito)
+function eliminarRemito(idRemito) {
+    Swal.fire({
+        title: "¿Esta seguro de eliminar el remito?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Eliminar",
+        cancelButtonText: "Cancelar",
+      }).then((result) => {
+        if (result.isConfirmed) {
+
+            $.post(
+                "../ajax/consultaremitos.php?op=eliminarRemito",
+                { id: idRemito },
+                function(response) {
+                    try {
+                        if (typeof response === 'string') {
+                            response = JSON.parse(response);
+                        }
+                        Swal.fire({
+                            title: "¡Operación exitosa!",
+                            text: "El remito fue eliminado.",
+                            icon: "success"
+                          });
+                          listarRemitos();
+                    } catch (e) {
+                        console.error("Error parsing JSON:", e);
+                        console.error("Response received:", response);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Hubo un problema al procesar la solicitud.',
+                        });
+                    }
+                }
+            );
+        }
+      });
+    
+}
+
+function verDetallesEspecificos(idtipo_producto,propiedad,accion,tipoenvase, idRemito, metros)
 {
     $.post(
         "../ajax/consultaremitos.php?op=verMasDetalles",
@@ -194,10 +324,21 @@ function verDetallesEspecificos(idtipo_producto,propiedad,accion,tipoenvase, idR
                 }
 
                 var detalles = "<table class='table' id='tableMasDetalles'>";
-                detalles += "<thead id='headDetalles'><tr><th colspan='2' style='text-align: center;'>Producto: " + response[0].nombre_tipo_producto + " | Propiedad: " + propiedad + "</th></tr><tr><th style='text-align: center;'>Capacidad</th><th style='text-align: center;'>Nº Serie</th></tr></thead>";                detalles += "<tbody>";
+                if(metros==null)
+                    {
+                        detalles += "<thead id='headDetalles'><tr><th colspan='2' style='text-align: center;'>Producto: " + response[0].nombre_tipo_producto + " | Propiedad: " + propiedad + "</th></tr><tr><th style='text-align: center;'>Capacidad</th><th style='text-align: center;'>Nº Serie</th></tr></thead>";                detalles += "<tbody>";
+                    }
+                    else
+                    {
+                        detalles += "<thead id='headDetalles'><tr><th colspan='2' style='text-align: center;'>Producto: " + response[0].nombre_tipo_producto + " | Propiedad: " + propiedad + "</th></tr><tr><th style='text-align: center;'>Nº Serie</th></tr></thead>";                detalles += "<tbody>";
+                    }
                 response.forEach(function(item) {
                     detalles += "<tr>";
-                    detalles += "<td style='text-align: center;'>" + item.capacidad + "</td>";
+                    if(metros==null)
+                    {
+                        detalles += "<td style='text-align: center;'>" + item.capacidad + "</td>";
+                    }
+                   
                     detalles += "<td style='text-align: center;'>" + item.nserie + "</td>";
                     detalles += "</tr>";
                 });
@@ -237,17 +378,28 @@ document.addEventListener('DOMContentLoaded', function() {
     
             const fechaInicialR = sessionStorage.getItem('fechaInicial');
             const fechaFinalR = sessionStorage.getItem('fechaFinal');
+            const nRemito = sessionStorage.getItem('nremito');
             var fechaInicial = document.getElementById("fechai");
             var fechaFinal = document.getElementById("fechaf");
+            var nremito = document.getElementById("nremito");
+            if(nRemito && nRemito != ''){
 
-            if (fechaInicialR && fechaFinalR) {
+                nremito.value = nRemito;
+                listarRemitos();
+                nremito.value = '';
+                sessionStorage.removeItem('fechaInicial');
+                sessionStorage.removeItem('fechaFinal');
+                sessionStorage.removeItem('nremito');
+            }else if (fechaInicialR && fechaFinalR) {
 
                 fechaInicial.value = fechaInicialR;
                 fechaFinal.value = fechaFinalR;
                 listarRemitos();
-                
+                fechaInicial.value = '';
+                fechaFinal.value = '';
                 sessionStorage.removeItem('fechaInicial');
                 sessionStorage.removeItem('fechaFinal');
+                sessionStorage.removeItem('nremito');
             }
         });
 
@@ -280,6 +432,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         function procesarDatos(data) {
             var remitos = [];
+            var metros = 0;
             var fechaActual = new Date();
             var fechaActualFormatted = fechaActual.getFullYear() + '-' + 
                                         ('0' + (fechaActual.getMonth() + 1)).slice(-2) + '-' + 
@@ -289,11 +442,10 @@ document.addEventListener('DOMContentLoaded', function() {
                                         ('0' + fechaActual.getSeconds()).slice(-2);
             
             var remitosMap = {};
-        
+            
             for (var i = 1; i < data.length; i++) {
                 var fila = data[i];
                 var remitoNumero = fila[1];
-        
                 if (!remitosMap[remitoNumero]) {
                     remitosMap[remitoNumero] = {
                         idusuario: '-',
@@ -305,14 +457,14 @@ document.addEventListener('DOMContentLoaded', function() {
                         cliente: fila[2],       // RAZON SOCIAL
                         informacion: '-',
                         pventa: fila[3],        // PVENTA
-                        detalles: []
+                        detalles: [],
+                        pentrega: fila[4]
                     };
                 }
         
                 var control = 11;
                 var serie = [];
                 var cantidad = parseFloat(fila[8]);
-                
 
                 if (cantidad === 0 || fila[7].includes('TERMO') || fila[7].includes('GRANEL')) {
                     serie.push(0);
@@ -393,6 +545,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 {
                     propiedadEnvase = fila[10];
                 }
+                if(fila[9] != undefined)
+                {
+                    metros = fila[9];
+                }
+                else
+                {
+                    metros = 0;
+                }
                 var detalle = {
                     nombre: nombre,
                     codigo: codigo,
@@ -400,7 +560,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     accion: fila[6],
                     propiedad: propiedadEnvase,
                     cantidad: fila[8],
-                    serie: serie
+                    serie: serie,
+                    pentrega: fila[4],
+                    metros:metros
                 };
                 
                 remitosMap[remitoNumero].detalles.push(detalle);

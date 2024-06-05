@@ -5,10 +5,18 @@ class Remitos {
     public function __construct() {}
 
     public function listarRemitos($fechai, $fechaf) {
-        $sql = "SELECT r.idremito, r.pventa, c.nombre AS cliente_nombre, DATE_FORMAT(r.fecha_remito, '%d/%m/%Y') AS fecha 
+        $sql = "SELECT r.idremito, r.numero, r.clasificacion, r.pventa, c.nombre AS cliente_nombre, DATE_FORMAT(r.fecha_remito, '%d/%m/%Y') AS fecha 
                 FROM remito r
                 INNER JOIN cliente c ON r.cliente = c.idcliente
-                WHERE r.fecha_remito >= '$fechai' AND r.fecha_remito <= '$fechaf'";
+                WHERE r.fecha_remito >= '$fechai' AND r.fecha_remito <= '$fechaf' AND estado = '1'";
+        return ejecutarConsulta($sql);
+    }
+
+    public function listarRemitos2($remito) {
+        $sql = "SELECT r.idremito, r.numero, r.clasificacion, r.pventa, c.nombre AS cliente_nombre, DATE_FORMAT(r.fecha_remito, '%d/%m/%Y') AS fecha 
+                FROM remito r
+                INNER JOIN cliente c ON r.cliente = c.idcliente
+                WHERE r.numero = '$remito' AND estado = '1'";
         return ejecutarConsulta($sql);
     }
     
@@ -28,7 +36,8 @@ class Remitos {
                     d.propiedad, 
                     d.tipoenvase, 
                     d.nserie, 
-                    d.accion
+                    d.accion,
+                    d.metros
                 FROM 
                     detalle_remito d
                 INNER JOIN 
@@ -69,6 +78,7 @@ class Remitos {
                 $cliente = !empty($remito['cliente']) ? $remito['cliente'] : '-';
                 $informacion = !empty($remito['informacion']) ? $remito['informacion'] : '-';
                 $pventa = !empty($remito['pventa']) ? $remito['pventa'] : '-';
+                $pentrega = !empty($remito['pentrega']) ? $remito['pentrega'] : '-';
                 
                 $sql = "SELECT idcliente FROM cliente WHERE nombre = '$cliente'";
                 $resultadoCliente = ejecutarConsultaSimpleFila($sql);
@@ -80,7 +90,7 @@ class Remitos {
                     $idcliente = $resultadoCliente['idcliente'];
                 }
     
-                $sqlInsertRemito = "INSERT INTO remito (idusuario, clasificacion, numero, fecha_hora, fecha_remito, estado, cliente, informacion, pventa) VALUES ('$idusuario', '$clasificacion', '$numero', '$fecha_hora', '$fecha_remito', '$estado', '$idcliente', '$informacion', '$pventa')";
+                $sqlInsertRemito = "INSERT INTO remito (idusuario, clasificacion, numero, fecha_hora, fecha_remito, estado, cliente, informacion, pventa, pentrega) VALUES ('$idusuario', '$clasificacion', '$numero', '$fecha_hora', '$fecha_remito', '$estado', '$idcliente', '$informacion', '$pventa', '$pentrega')";
                 $resultadoInsertRemito = ejecutarConsulta($sqlInsertRemito);
                 if ($resultadoInsertRemito !== true) {
                     $success = false;
@@ -95,17 +105,18 @@ class Remitos {
                         $nombre = $detalle['nombre'];
                         $envase = $detalle['envase'];
                         $accion = $detalle['accion'];
+                        $metros = $detalle['metros'];
                     
                         $propiedad = isset($detalle['propiedad']) ? $detalle['propiedad'] : '-';
                         
-                        $serie = isset($detalle['serie']) ? $detalle['serie'] : array(); // Si 'serie' no está definido, asignar un array vacío
+                        $serie = isset($detalle['serie']) ? $detalle['serie'] : array(); 
                     
                         $sqlIDProducto = "SELECT idtipo_producto FROM tipo_producto WHERE nombre = '$nombre'";
                         $resultado = ejecutarConsultaSimpleFila($sqlIDProducto);
                         $idproducto = (float)$resultado['idtipo_producto'];
                     
                         foreach ($serie as $nser) {
-                            $sqlInsertarDetalleRemito = "INSERT INTO detalle_remito (idremito, idtipo_producto, capacidad, propiedad, tipoenvase, nserie, accion) VALUES ('$idremito','$idproducto','1','$propiedad','$envase','$nser','$accion')";
+                            $sqlInsertarDetalleRemito = "INSERT INTO detalle_remito (idremito, idtipo_producto, capacidad, propiedad, tipoenvase, nserie, metros, accion) VALUES ('$idremito','$idproducto','1','$propiedad','$envase','$nser', '$metros', '$accion')";
                             ejecutarConsulta($sqlInsertarDetalleRemito);
                         }
                     }
@@ -124,7 +135,17 @@ class Remitos {
         echo json_encode($response);
     }
     
-    
+    public function eliminarRemito($idRemito)
+    {
+        $sql = "UPDATE remito SET estado = '0' WHERE idremito = '$idRemito';";
+        $resultado = ejecutarConsulta($sql);
+
+        if (strpos($resultado, 'Error') !== false) {
+            echo json_encode(['success' => false, 'message' => $resultado]);
+        } else {
+            echo json_encode(['success' => true, 'message' => 'El remito fue eliminado.']);
+        }
+    }
 
 }
 
