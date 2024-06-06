@@ -1,36 +1,27 @@
 var tabla;
 
-//Funcion que se ejecuta al inicio
 function init()
 {
     mostrarform(false);
     listar();
-
     $("#formulario").on("submit",function(e)
     {
         guardaryeditar(e);
     })
-
     $("#imagenmuestra").hide();
-
     $('[data-toggle="tooltip"]').tooltip();
 }
 
-//funcion limpiar
 function limpiar()
 {
     $("#nombre").val("");
     $("#direccion").val("");
     $("#localidad").val("");
-
     $("#imagenmuestra").attr("src","");
     $("#imagenactual").val("");
-
     $("#idcliente").val("");
-
 }
 
-//funcion mostrar formulario
 function mostrarform(flag)
 {
     limpiar();
@@ -50,22 +41,20 @@ function mostrarform(flag)
     }
 }
 
-//Funcion cancelarform
 function cancelarform()
 {
     limpiar();
     mostrarform(false);
 }
 
-//Funcion listar
 function listar()
 {
     tabla = $('#tblistado')
         .dataTable(
             {
-                "aProcessing":true, //Activamos el procesamiento del datatables
-                "aServerSide":true, //Paginacion y filtrado realizados por el servidor
-                dom: "Bfrtip", //Definimos los elementos del control de tabla
+                "aProcessing":true, 
+                "aServerSide":true, 
+                dom: "Bfrtip", 
                 buttons:[
                     'copyHtml5',
                     'excelHtml5',
@@ -81,17 +70,16 @@ function listar()
                     }
                 },
                 "bDestroy": true,
-                "iDisplayLength": 5, //Paginacion
-                "order": [[0,"desc"]] //Ordenar (Columna, orden)
+                "iDisplayLength": 5, 
+                "order": [[0,"desc"]] 
             
             })
         .DataTable();
 }
 
-//funcion para guardar o editar
 function guardaryeditar(e)
 {
-    e.preventDefault(); //No se activará la acción predeterminada del evento
+    e.preventDefault(); 
 	$("#btnGuardar").prop("disabled",true);
     var formData = new FormData($("#formulario")[0]);
     
@@ -137,8 +125,6 @@ function mostrar(idcliente) {
     );
 }
 
-
-//funcion para descativar categorias
 function desactivar(idcliente) {
     bootbox.confirm("¿Estas seguro de desactivar el cliente?", function(result) {
         if (result) {

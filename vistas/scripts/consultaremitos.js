@@ -12,7 +12,6 @@ function listarRemitos() {
                     if (typeof response === 'string') {
                         response = JSON.parse(response);
                     }
-
                     if (response.error) {
                         Swal.fire({
                             icon: 'error',
@@ -215,7 +214,6 @@ function verDetalles(idRemito) {
                 
                 
                 detalles += "<thead id='headDetalles'><tr><th colspan='7' style='text-align: center;'>Envases entregados: " + response[0].totalE + " | NP: " + response[0].totalNPE + " | SP: " +  response[0].totalSPE +  " | Envases retirados: " + response[0].totalD + " | NP: " + response[0].totalNPD + " | SP: " +  response[0].totalSPD + "</th></tr>";
-
                 detalles += "<tr><th style='text-align: center;'>Producto</th><th style='text-align: center;'>Propiedad</th><th style='text-align: center;'>Accion</th><th style='text-align: center;'>Metros</th><th style='text-align: center;'>Tipo de envase</th><th style='text-align: center;'>Cantidad</th><th style='text-align: center;'>Detalles</th></tr></thead>";
                 detalles += "<tbody>";
                 response.forEach(function(item) {

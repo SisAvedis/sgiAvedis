@@ -95,8 +95,8 @@
         <div id="masDetallesModal" class="modal" style="max-width:600px;">
             <div class="modal-content" style="max-width:600px;">
                 <div id="masDetallesContainer"></div>
-                <button type="button" onclick="cerrarMasDetallesModal()" class="btn btn-danger" style="font-size:14px;">Cerrar</button>
             </div>
+            <button type="button" onclick="cerrarMasDetallesModal()" class="btn btn-danger" style="font-size:14px;">Cerrar</button>
         </div>
 
         </div>

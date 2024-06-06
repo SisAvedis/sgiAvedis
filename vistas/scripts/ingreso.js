@@ -289,7 +289,7 @@ function cerrarModal() {
 function generarCampos() {
     var cantidad = parseInt($('#cantidad').val());
 
-    if (!isNaN(cantidad) && cantidad > 0) {
+    if (!isNaN(cantidad) && cantidad >= 0) {
         $('#camposExtra').empty();
         var tipoProducto = $('#tipoProducto').val();
         $.ajax({
@@ -327,6 +327,10 @@ function generarCampos() {
                     }
 
                     $('.autocompletar').on('input', handleAutocomplete);
+                    if(cantidad==0)
+                    {
+                        $('#cantidad').val('');
+                    }
                 } else {
                     alert('Error al obtener las capacidades desde la base de datos.');
                 }
@@ -343,12 +347,15 @@ function generarCampos() {
 function handleAutocomplete() {
     var index = $(this).data('index');
     var query = $(this).val();
+    var tipoProducto = $('#tipoProducto').val();
+    var propiedad = $('input[name="propiedad2"]:checked').val();
+
     if (query.length > 0) {
         $.ajax({
             url: '../ajax/ingreso.php?op=buscarNserie',
             type: 'POST',
             data: {
-                query: query
+                query: query, tipoProducto:tipoProducto, propiedad:propiedad
             },
             dataType: 'json',
             success: function(response) {
@@ -368,7 +375,7 @@ function handleAutocomplete() {
                             url: '../ajax/ingreso.php?op=completarCapacidad',
                             type: 'POST',
                             data: {
-                                value: value
+                                value: value, producto:tipoProducto, propiedad:propiedad
                             },
                             dataType: 'json',
                             success: function(response) {
@@ -407,13 +414,13 @@ $(document).on('click', function(event) {
 });
 
 window.onbeforeunload = function(event) {
-    // Crear un objeto XMLHttpRequest
+    
     var xhr = new XMLHttpRequest();
-    // Configurar la petición como síncrona
+    
     xhr.open("POST", "../ajax/ingreso.php?op=vaciarTemporal", false);
-    // Enviar la petición
+    
     xhr.send();
-    // Comprobar el estado de la respuesta
+    
     if (xhr.status === 200) {
         console.log('Petición AJAX ejecutada con éxito:', xhr.responseText);
     } else {
@@ -429,7 +436,6 @@ document.addEventListener('DOMContentLoaded', function() {
     listarClientes();
     if (mostrarCambiarDatos) {
         
-        alert('IDCambio: ' + idCambio);
         document.getElementById('enviarDatosBtn').style.display = 'none';
         document.getElementById('cambiarDatosBtn').style.display = 'inline-block';
         document.getElementById('cancelarBtn').style.display = 'inline-block';
@@ -503,6 +509,7 @@ $(document).ready(function() {
     var cancelBtn = $('#cancelBtn');
     var confirmBtn = $('#confirmBtn');
     var $cancelarBtn = $('#cancelarBtn');
+    var comprobar = false;
         
     openModalBtn.on('click', function() {
         modal.show();
@@ -514,6 +521,12 @@ $(document).ready(function() {
     });
 
     cancelBtn.on('click', function() {
+        $('#tipoProducto').val('');
+                $('input[name="propiedad"]:checked').prop('checked', false);
+                $('input[name="propiedad2"]:checked').prop('checked', false);
+                $('input[name="accion"]:checked').prop('checked', false);
+                $('#cantidad').val('0');
+                generarCampos();
         modal.hide();
     });
 
@@ -554,8 +567,7 @@ $(document).ready(function() {
             });
             return; 
         }
-        
-        if (isNaN(cantidad) || cantidad <= 0) {
+        if (isNaN(cantidad) || cantidad < 0) {
             Swal.fire({
                 icon: 'warning',
                 title: 'Cantidad inválida',
@@ -604,13 +616,14 @@ $(document).ready(function() {
                     $('input[name="propiedad"]:checked').prop('checked', false);
                     $('input[name="propiedad2"]:checked').prop('checked', false);
                     $('input[name="accion"]:checked').prop('checked', false);
-                    $('#cantidad').val('1');
                     for (var i = 0; i < cantidad; i++) {
                         $('#nserie' + i).val('');
                         $('#capacidad' + i).val('');
                     }
+                    $('#cantidad').val('0');
                     generarCampos();
                     actualizarProductos();
+                    comprobar = true;
                     modal.hide();
                 } else {
                     console.error("Error al guardar datos:", response.message);
@@ -704,7 +717,18 @@ $(document).ready(function() {
             });
             return; 
         }
-    
+
+        if (!comprobar) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Campos obligatorios vacíos',
+                text: 'Por favor, ingrese aunque sea un producto antes de continuar.',
+                customClass: {
+                    container: 'alert-z-index'
+                },
+            });
+            return; 
+        }
         $.ajax({
             url: '../ajax/ingreso.php?op=enviarDatosDetalleRemito',
             type: 'POST',
@@ -727,12 +751,14 @@ $(document).ready(function() {
                         showConfirmButton: false,
                         timer: 1500
                     });
-                    // Limpiar los campos si la operación fue exitosa
+                    
                     $('#cliente').val('');
                     $('#ncomprobante').val('');
                     $('#fecha').val('');
                     $('#detalles').val('');
                     $('input[name="estado"]:checked').prop('checked', false);
+                    var puntoVenta = $('#puntoVenta').val('');
+                     var puntoEntrega = $('#puntoEntrega').val('');
                     actualizarProductos();
                 } else {
                     Swal.fire({

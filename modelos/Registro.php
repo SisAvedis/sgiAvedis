@@ -86,6 +86,12 @@ class Registro
     }
     public function enviarDatosDetalleRemito()
     {
+        ini_set('display_errors', 1);
+        ini_set('display_startup_errors', 1);
+        error_reporting(E_ALL);
+
+        ob_start();
+
         $idusuarioEditar = isset($_COOKIE['idusuario']) ? $_COOKIE['idusuario'] : '';
         $cliente = $_POST['cliente'];
         $detalles = $_POST['detalles'];
@@ -101,13 +107,9 @@ class Registro
         $sql2 = "INSERT INTO logs (idventana_abm, idusuario, fecha_hora, consulta) VALUES ('2', '$idusuarioEditar', NOW(), '$sql');";
         ejecutarConsulta($sql2);
 
-
         $sql = "SELECT IFNULL(MAX(idremito), 1) AS proximo_id FROM remito";
-
         $result = ejecutarConsulta($sql);
-
         $row = mysqli_fetch_assoc($result);
-
         $proximo_id = $row['proximo_id'];
 
         $sql = "SELECT tipoproducto, tipoenvase, propiedad, nserie, capacidad, accion FROM detalle_temporal";
@@ -121,10 +123,10 @@ class Registro
             $capacidad = $rowData['capacidad'];
             $accion = $rowData['accion'];
 
-            $sqlconsulta = "SELECT COUNT(*) AS existe FROM envase WHERE nserie = '$nserie'";
+            $sqlconsulta = "SELECT COUNT(*) AS existe FROM envase WHERE nserie = '$nserie' AND idproducto = '$tipoProducto' AND propiedad = '$propiedad'";
             $resultado = ejecutarConsultaSimpleFila($sqlconsulta);
             if ($resultado['existe'] == 0) {
-                $sqlRegistro = "INSERT INTO envase (nserie, capacidad) VALUES ('$nserie', '$capacidad')";
+                $sqlRegistro = "INSERT INTO envase (idproducto, propiedad, nserie, capacidad) VALUES ('$tipoProducto','$propiedad','$nserie', '$capacidad')";
                 ejecutarConsulta($sqlRegistro);
             }
             $sqlInsert = "INSERT INTO detalle_remito (idremito, idtipo_producto, tipoenvase, propiedad, nserie, capacidad, accion) VALUES (\"$proximo_id\",\"$tipoProducto\", \"$tipoEnvase\", \"$propiedad\", \"$nserie\", \"$capacidad\", \"$accion\")";
@@ -136,9 +138,12 @@ class Registro
         ejecutarConsulta($sql);
         $sql = "ALTER TABLE detalle_temporal AUTO_INCREMENT = 1;";
         ejecutarConsulta($sql);
+
+        ob_end_clean();
         echo json_encode(['success' => true]);
         exit();
     }
+
 
     public function obtenerProductosAgrupados() {
         $sql = "SELECT dt.tipoproducto, tp.nombre AS nombre_producto, dt.tipoenvase, dt.propiedad, dt.accion, COUNT(*) AS cantidad
@@ -291,11 +296,14 @@ class Registro
 
     function buscarNserie() {
         $query = isset($_POST['query']) ? $_POST['query'] : '';
+        $propiedad = isset($_POST['propiedad']) ? $_POST['propiedad'] : '';
+        $tipoProducto = isset($_POST['tipoProducto']) ? $_POST['tipoProducto'] : '';
+        
         if (empty($query)) {
             echo json_encode(['success' => false, 'message' => 'Query parameter is missing']);
             return;
         }
-        $sql = "SELECT nserie FROM envase WHERE nserie LIKE '%$query%'";
+        $sql = "SELECT nserie FROM envase WHERE nserie LIKE '%$query%' AND propiedad = '$propiedad' AND idproducto = '$tipoProducto'";
         $result = ejecutarConsulta($sql);
         if ($result && $result->num_rows > 0) {
             $nseries = [];
@@ -310,7 +318,9 @@ class Registro
 
     function completarCapacidad(){
         $value = isset($_POST['value']) ? $_POST['value'] : '';
-        $sql = "SELECT capacidad FROM envase WHERE nserie = '$value'";
+        $propiedad = isset($_POST['propiedad']) ? $_POST['propiedad'] : '';
+        $producto = isset($_POST['producto']) ? $_POST['producto'] : '';
+        $sql = "SELECT capacidad FROM envase WHERE nserie = '$value' AND idproducto = '$producto' AND propiedad = '$propiedad'";
         $result = ejecutarConsulta($sql);
         if ($result && $result->num_rows > 0) {
             $row = $result->fetch_assoc();

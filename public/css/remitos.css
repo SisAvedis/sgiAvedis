@@ -168,8 +168,8 @@ h1 {
     width: 80%; /* Anchura del contenido del modal */
     max-width: 300px; /* Anchura máxima del modal */
     position: relative;
-    top: 30%; /* Mover hacia abajo la mitad de la altura del contenido */
-    transform: translateY(-150%);
+    top: 50%; /* Mover hacia abajo la mitad de la altura del contenido */
+    transform: translateY(-83%);
 }
 
 .alert-z-index {
