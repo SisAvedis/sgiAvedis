@@ -49,7 +49,7 @@
                         </div>  
                         <div class="col-md-3">
                             <div class="form-group">
-                                <button class="btn btn-success" type="button" onclick="listarRemitos()" style="margin-top:11.5%;"><i class="fa fa-search"></i> Listar</button>
+                                <button class="btn btn-success" type="button" onclick="listarRemitos()" style="margin-top:16%;"><i class="fa fa-search"></i> Listar</button>
                             </div>
                         </div>
             </div>
@@ -61,8 +61,10 @@
                 <div class="col-md-4">
                 <h4>Historial de remitos</h4>
                 </div>
-                <div class="col-md-5"></div>
-                <div class="col-md-2">
+                <div class="col-md-4"></div>
+                <div class="col-md-4" style="margin-top:1%;">
+                    <label for="buscador">Buscador: </label>
+                    <input type="text" id="buscador" style="color:black;" oninput="filtrarDatos()">
                 </div>
             </div>
             <div class="card-body" id="bodyCard2">

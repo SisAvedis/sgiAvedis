@@ -49,10 +49,11 @@ class Registro
         $fecha = $_POST['fecha'];
         $estado = $_POST['estado'];
         $puntoVenta = $_POST['puntoVenta'];
+        $puntoEntrega = $_POST['puntoEntrega'];
         $idCambio = $_POST['idCambio'];
         $idusuario = isset($_COOKIE['idusuario']) ? $_COOKIE['idusuario'] : '';
 
-        $sql = "UPDATE remito SET idusuario = \"$idusuario\", numero = \"$ncomprobante\", cliente = \"$cliente\", informacion = \"$detalles\", fecha_hora = NOW(), fecha_remito = \"$fecha\", clasificacion = \"$estado\", pventa = \"$puntoVenta\", estado = \"1\" WHERE idremito = \"$idCambio\"";
+        $sql = "UPDATE remito SET idusuario = \"$idusuario\", numero = \"$ncomprobante\", cliente = \"$cliente\", informacion = \"$detalles\", fecha_hora = NOW(), fecha_remito = \"$fecha\", clasificacion = \"$estado\", pventa = \"$puntoVenta\", pentrega = \"$puntoEntrega\", estado = \"1\" WHERE idremito = \"$idCambio\"";
         ejecutarConsulta($sql);
         $sql2 = "INSERT INTO logs (idventana_abm, idusuario, fecha_hora, consulta) VALUES ('2', '$idusuarioEditar', NOW(), '$sql');";
         ejecutarConsulta($sql2);

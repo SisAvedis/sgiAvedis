@@ -483,7 +483,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 var formattedDate = fecha.toISOString().split('T')[0];
                 document.getElementById('fecha').value = formattedDate;
                 sessionStorage.removeItem('mostrarCambiarDatos');
-                sessionStorage.removeItem('idCambio');
                 actualizarProductos();
                 
             },
@@ -643,8 +642,9 @@ $(document).ready(function() {
         var detalles = $('#detalles').val();
         var estado = $('input[name="estado"]:checked').val();
         var puntoVenta = $('#puntoVenta').val();
+        var puntoEntrega = $('#puntoEntrega').val();
         const idCambio = sessionStorage.getItem('idCambio');
-    
+        
         if (!cliente || !ncomprobante || !fecha || !puntoVenta || !estado) {
             Swal.fire({
                 icon: 'warning',
@@ -667,6 +667,7 @@ $(document).ready(function() {
                 ncomprobante: ncomprobante,
                 estado: estado,
                 puntoVenta: puntoVenta,
+                puntoEntrega: puntoEntrega,
                 fecha: fecha,
                 idCambio: idCambio
             },
@@ -679,9 +680,10 @@ $(document).ready(function() {
                         title: "Remito editado con éxito",
                         showConfirmButton: false,
                         timer: 1500
+                    }).then(() => {
+                        sessionStorage.removeItem('idCambio');
+                        window.location.href = "consultaremitos.php";
                     });
-                    sessionStorage.removeItem('idCambio');
-                    window.location.href = "consultaremitos.php";
                 } else {
                     Swal.fire({
                         icon: "Error",
@@ -706,6 +708,24 @@ $(document).ready(function() {
         var puntoVenta = $('#puntoVenta').val();
         var puntoEntrega = $('#puntoEntrega').val();
     
+        let hoy = new Date();
+        let dia = String(hoy.getDate()).padStart(2, '0');
+        let mes = String(hoy.getMonth() + 1).padStart(2, '0');
+        let año = hoy.getFullYear();
+        let fecha_actual = año + '-' + mes + '-' + dia;
+        
+        if (fecha > fecha_actual) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Verificación de la fecha',
+                text: 'Por favor, no ingresar fechas futuras.',
+                customClass: {
+                    container: 'alert-z-index'
+                },
+            });
+            return; 
+        }
+
         if (!cliente || !ncomprobante || !fecha || !puntoVenta || !estado || !puntoEntrega) {
             Swal.fire({
                 icon: 'warning',
@@ -775,3 +795,4 @@ $(document).ready(function() {
     });
     
 });
+

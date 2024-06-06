@@ -159,6 +159,32 @@ function listarRemitos() {
     }
 }
 
+function filtrarDatos() {
+    var input = document.getElementById("buscador");
+    var filter = input.value.toLowerCase();
+    var table = document.getElementById("detallesRemitos").getElementsByTagName("table")[0];
+    var tr = table.getElementsByTagName("tr");
+
+    for (var i = 1; i < tr.length; i++) {
+        var visible = false;
+        var td = tr[i].getElementsByTagName("td");
+
+        for (var j = 0; j < td.length; j++) {
+            if (td[j] && td[j].style.display !== "none") {
+                if (td[j].innerHTML.toLowerCase().indexOf(filter) > -1) {
+                    visible = true;
+                    break;
+                }
+            }
+        }
+
+        if (visible === true) {
+            tr[i].style.display = "";
+        } else {
+            tr[i].style.display = "none";
+        }
+    }
+}
 
 function verDetalles(idRemito) {
     $.post(
@@ -371,37 +397,7 @@ function cerrarModal() {
     $("#modalDetalles").modal("hide");
 }
 
-
-document.addEventListener('DOMContentLoaded', function() {
-    
-            const fechaInicialR = sessionStorage.getItem('fechaInicial');
-            const fechaFinalR = sessionStorage.getItem('fechaFinal');
-            const nRemito = sessionStorage.getItem('nremito');
-            var fechaInicial = document.getElementById("fechai");
-            var fechaFinal = document.getElementById("fechaf");
-            var nremito = document.getElementById("nremito");
-            if(nRemito && nRemito != ''){
-
-                nremito.value = nRemito;
-                listarRemitos();
-                nremito.value = '';
-                sessionStorage.removeItem('fechaInicial');
-                sessionStorage.removeItem('fechaFinal');
-                sessionStorage.removeItem('nremito');
-            }else if (fechaInicialR && fechaFinalR) {
-
-                fechaInicial.value = fechaInicialR;
-                fechaFinal.value = fechaFinalR;
-                listarRemitos();
-                fechaInicial.value = '';
-                fechaFinal.value = '';
-                sessionStorage.removeItem('fechaInicial');
-                sessionStorage.removeItem('fechaFinal');
-                sessionStorage.removeItem('nremito');
-            }
-        });
-
-        function subirDocumento() {
+function subirDocumento() {
             var input = document.createElement('input');
             input.type = 'file';
             input.accept = '.xlsx,.xls';
